@@ -9,7 +9,6 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import KnowledgeBase from "./pages/KnowledgeBase";
 import Users from "./pages/Users";
-import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
@@ -29,7 +28,6 @@ const App = () => (
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/knowledge-base" element={<ProtectedRoute><KnowledgeBase /></ProtectedRoute>} />
             <Route path="/users" element={<ProtectedRoute><Users /></ProtectedRoute>} />
-            <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
