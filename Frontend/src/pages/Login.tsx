@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
@@ -9,77 +9,130 @@ import logo from '@/assets/technieum-logo.png';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-/* ─── Floating Orb Particle ─────────────────────────────────────────────── */
-interface Particle {
-  id: number;
-  x: number;
-  y: number;
-  size: number;
-  duration: number;
-  delay: number;
-  color: string;
-}
+/* ─── Matrix rain (canvas) — cyber field ─────────────────────────────────── */
+const MATRIX_CHARSET =
+  'ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅ0123456789ABCDEFﾊﾋﾌﾍﾎ<>[]{}0x#$_';
 
-function ParticleField() {
-  const particles: Particle[] = Array.from({ length: 18 }, (_, i) => ({
-    id: i,
-    x: Math.random() * 100,
-    y: Math.random() * 100,
-    size: Math.random() * 3 + 1,
-    duration: Math.random() * 12 + 8,
-    delay: Math.random() * 6,
-    color: i % 3 === 0 ? '#f97316' : i % 3 === 1 ? '#ef4444' : '#fbbf24',
-  }));
+function MatrixRainCanvas() {
+  const ref = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = ref.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let raf = 0;
+    let cancelled = false;
+    let columns = 0;
+    const drops: number[] = [];
+    let fontSize = 13;
+    let w = 0;
+    let h = 0;
+
+    const resize = () => {
+      const parent = canvas.parentElement;
+      if (!parent) return;
+      w = Math.max(parent.clientWidth, window.innerWidth);
+      h = Math.max(parent.clientHeight, window.innerHeight);
+      canvas.width = w;
+      canvas.height = h;
+      fontSize = w < 480 ? 11 : 13;
+      columns = Math.ceil(w / fontSize) + 1;
+      drops.length = 0;
+      for (let i = 0; i < columns; i++) {
+        drops.push(Math.random() * -80);
+      }
+    };
+
+    resize();
+    const ro = new ResizeObserver(resize);
+    if (canvas.parentElement) ro.observe(canvas.parentElement);
+    window.addEventListener('resize', resize);
+
+    const draw = () => {
+      if (cancelled) return;
+      if (w < 16 || h < 16) {
+        raf = requestAnimationFrame(draw);
+        return;
+      }
+      /* Light trail wipe so columns stay readable top-to-bottom (was 0.2 → looked “blurred away”) */
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.06)';
+      ctx.fillRect(0, 0, w, h);
+      ctx.font = `${fontSize}px ui-monospace, "Cascadia Code", "Consolas", monospace`;
+
+      for (let i = 0; i < columns; i++) {
+        const row = drops[i] ?? 0;
+        const char = MATRIX_CHARSET[(i * 31 + Math.floor(row * 2)) % MATRIX_CHARSET.length];
+        const x = i * fontSize;
+        const y = row * fontSize;
+        const head = row < 10;
+        if (head) {
+          ctx.fillStyle = '#fed7aa';
+          ctx.shadowBlur = 0;
+          ctx.globalAlpha = 0.95;
+        } else {
+          const depth = Math.min(1, (row % 28) / 28);
+          ctx.fillStyle =
+            depth < 0.35 ? '#fb923c' : depth < 0.7 ? '#ea580c' : '#c2410c';
+          ctx.globalAlpha = 0.42 + depth * 0.38;
+        }
+        ctx.fillText(char, x, y);
+        ctx.globalAlpha = 1;
+
+        if (y > h + fontSize * 10 || Math.random() > 0.988) {
+          drops[i] = Math.random() * -25;
+        } else {
+          drops[i] = row + (0.65 + Math.random() * 0.35);
+        }
+      }
+
+      raf = requestAnimationFrame(draw);
+    };
+
+    raf = requestAnimationFrame(draw);
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+      window.removeEventListener('resize', resize);
+    };
+  }, []);
 
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {particles.map((p) => (
-        <div
-          key={p.id}
-          className="absolute rounded-full opacity-0"
-          style={{
-            left: `${p.x}%`,
-            top: `${p.y}%`,
-            width: `${p.size}px`,
-            height: `${p.size}px`,
-            background: p.color,
-            boxShadow: `0 0 ${p.size * 4}px ${p.color}`,
-            animation: `floatParticle ${p.duration}s ${p.delay}s infinite ease-in-out`,
-          }}
-        />
-      ))}
-    </div>
-  );
-}
-
-/* ─── Animated Grid Lines ────────────────────────────────────────────────── */
-function ScanGrid() {
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-[0.04]">
-      <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
-            <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#f97316" strokeWidth="0.5" />
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#grid)" />
-      </svg>
-    </div>
-  );
-}
-
-/* ─── Scan Line ──────────────────────────────────────────────────────────── */
-function ScanLine() {
-  return (
-    <div
-      className="absolute left-0 right-0 h-px pointer-events-none"
-      style={{
-        background: 'linear-gradient(90deg, transparent, #f97316 30%, #ef4444 70%, transparent)',
-        animation: 'scanLine 6s linear infinite',
-        opacity: 0.35,
-        top: 0,
-      }}
+    <canvas
+      ref={ref}
+      className="absolute inset-0 z-[1] h-full w-full pointer-events-none"
+      aria-hidden
     />
+  );
+}
+
+/* ─── Animated cyber grid + depth field ──────────────────────────────────── */
+function CyberGridField() {
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+      <div
+        className="absolute inset-0 opacity-[0.07]"
+        style={{
+          backgroundImage: `
+            linear-gradient(rgba(249,115,22,0.35) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(249,115,22,0.35) 1px, transparent 1px)
+          `,
+          backgroundSize: '48px 48px',
+        }}
+      />
+      <div
+        className="absolute inset-0 opacity-[0.04]"
+        style={{
+          backgroundImage: `
+            linear-gradient(rgba(251,191,36,0.5) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(251,191,36,0.5) 1px, transparent 1px)
+          `,
+          backgroundSize: '16px 16px',
+        }}
+      />
+    </div>
   );
 }
 
@@ -92,14 +145,8 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [emailError, setEmailError] = useState('');
   const [passwordHint, setPasswordHint] = useState('');
-  const [mounted, setMounted] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const t = setTimeout(() => setMounted(true), 50);
-    return () => clearTimeout(t);
-  }, []);
 
   const handleEmailChange = (val: string) => {
     setEmail(val);
@@ -145,33 +192,12 @@ export default function Login() {
     }
   };
 
-  const currentYear = new Date().getFullYear();
-
   return (
     <>
       <style>{`
-        @keyframes floatParticle {
-          0%   { transform: translateY(0px) translateX(0px); opacity: 0; }
-          20%  { opacity: 0.8; }
-          50%  { transform: translateY(-60px) translateX(20px); opacity: 0.5; }
-          80%  { opacity: 0.3; }
-          100% { transform: translateY(-120px) translateX(-10px); opacity: 0; }
-        }
-        @keyframes scanLine {
-          0%   { top: -2px; }
-          100% { top: 100%; }
-        }
-        @keyframes slideInLeft {
-          from { opacity: 0; transform: translateX(-40px); }
-          to   { opacity: 1; transform: translateX(0); }
-        }
         @keyframes fadeUp {
           from { opacity: 0; transform: translateY(20px); }
           to   { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes orbPulse {
-          0%, 100% { transform: scale(1); opacity: 0.15; }
-          50%       { transform: scale(1.2); opacity: 0.25; }
         }
         @keyframes btnGlow {
           0%, 100% { box-shadow: 0 0 10px #f9731460, 0 4px 20px #ef444430; }
@@ -181,15 +207,6 @@ export default function Login() {
           0%   { left: -100%; }
           60%  { left: 120%; }
           100% { left: 120%; }
-        }
-
-        .role-card {
-          transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-        }
-        .role-card:hover {
-          transform: translateX(6px);
-          box-shadow: -3px 0 0 #f97316, 0 0 20px #f9731620;
-          border-color: #f9731650 !important;
         }
 
         .login-btn {
@@ -232,70 +249,24 @@ export default function Login() {
         }
       `}</style>
 
-      <div className="min-h-screen flex flex-col">
-        <div className="flex flex-1">
-
-          {/* ── LEFT PANEL ─────────────────────────────────────────────── */}
-          <div className="hidden lg:flex lg:w-1/2 bg-background relative overflow-hidden flex-col justify-center items-center p-12">
-            <ScanGrid />
-            <ScanLine />
-            <ParticleField />
-
-            <div
-              className="absolute top-1/4 -left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl"
-              style={{ animation: 'orbPulse 8s ease-in-out infinite' }}
-            />
-            <div
-              className="absolute bottom-1/4 right-0 w-80 h-80 bg-red-500/10 rounded-full blur-3xl"
-              style={{ animation: 'orbPulse 10s 2s ease-in-out infinite' }}
-            />
-
-            <div className="relative z-10 text-center max-w-md">
-              <h1
-                className="text-4xl font-bold mb-4"
-                style={{ animation: mounted ? 'slideInLeft 0.8s 0.1s ease both' : 'none', opacity: mounted ? 1 : 0 }}
-              >
-                Welcome to
-              </h1>
-              <h2
-                className="text-3xl font-bold text-gradient mb-6"
-                style={{ animation: mounted ? 'slideInLeft 0.8s 0.25s ease both' : 'none', opacity: mounted ? 1 : 0 }}
-              >
-                Technieum CTF Portal
-              </h2>
-              <p
-                className="text-xl text-muted-foreground mb-12"
-                style={{ animation: mounted ? 'fadeUp 0.8s 0.4s ease both' : 'none', opacity: mounted ? 1 : 0 }}
-              >
-                Let's streamline your pentest operations
-              </p>
-
-              <div className="space-y-4 text-left">
-                {[
-                  { role: 'Manager', desc: 'Be on top of your projects', delay: '0.55s' },
-                  { role: 'Pentester', desc: 'Let your team focus on finding bugs', delay: '0.7s' },
-                  { role: 'Admin', desc: 'Seamless platform management', delay: '0.85s' },
-                ].map(({ role, desc, delay }) => (
-                  <div
-                    key={role}
-                    className="role-card bg-card/60 backdrop-blur-sm border border-border/50 rounded-xl p-4 relative overflow-hidden"
-                    style={{ animation: mounted ? `slideInLeft 0.7s ${delay} ease both` : 'none', opacity: mounted ? 1 : 0 }}
-                  >
-                    <div
-                      className="absolute left-0 top-0 bottom-0 w-0.5 rounded-l-xl"
-                      style={{ background: 'linear-gradient(180deg, #f97316, #ef4444)' }}
-                    />
-                    <h3 className="text-primary font-semibold mb-1 pl-2">{role}</h3>
-                    <p className="text-sm text-muted-foreground pl-2">{desc}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
+      <div className="relative min-h-screen flex flex-col">
+        {/* Full-viewport matrix + grid behind entire login (both columns + footer) */}
+        <div
+          className="pointer-events-none fixed inset-0 z-0 min-h-[100dvh] w-full bg-black"
+          aria-hidden
+        >
+          <div className="absolute inset-0 min-h-[100dvh] w-full">
+            <CyberGridField />
+            <MatrixRainCanvas />
           </div>
+        </div>
 
-          {/* ── RIGHT PANEL (original, untouched layout) ────────────────── */}
-          <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-gradient-to-br from-background via-card to-background relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-accent/5 to-destructive/5" />
+        <div className="relative z-10 flex min-h-0 flex-1 flex-col bg-transparent">
+          <div className="relative flex min-h-0 flex-1 w-full items-center justify-center bg-transparent p-8">
+            <div
+              className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-destructive/10"
+              aria-hidden
+            />
 
             <div className="relative z-10 w-full max-w-md">
               {/* Logo */}
@@ -413,23 +384,6 @@ export default function Login() {
             </div>
           </div>
         </div>
-
-        {/* Footer */}
-        <footer className="border-t border-border/50 bg-background/80 backdrop-blur-sm py-4 px-6">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <img
-                src={logo}
-                alt="Technieum"
-                className="h-8 w-auto max-w-[140px] object-contain"
-              />
-              <span className="text-sm font-medium text-muted-foreground">Technieum CTF Portal</span>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              © {currentYear} Technieum. All rights reserved.
-            </p>
-          </div>
-        </footer>
       </div>
     </>
   );
