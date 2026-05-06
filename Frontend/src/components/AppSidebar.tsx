@@ -2,7 +2,6 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   LayoutDashboard,
-  FolderKanban,
   Users,
   LogOut,
   ChevronLeft,
@@ -32,7 +31,6 @@ import logo from '@/assets/technieum-logo.png';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['admin', 'manager', 'tester'] },
-  { name: 'Projects', href: '/projects', icon: FolderKanban, roles: ['admin', 'manager', 'tester'] },
   { name: 'Users', href: '/users', icon: Users, roles: ['admin', 'manager'] },
 ];
 

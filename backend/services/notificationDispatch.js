@@ -61,7 +61,7 @@ function verbPast(method) {
 /**
  * @param {import('express').Request} req
  * @param {object} body - JSON body passed to res.json()
- * @param {string} matchedPrefix - e.g. '/api/projects'
+ * @param {string} matchedPrefix - e.g. '/api/users'
  * @param {string} method
  */
 async function notifyFromRequest({ req, body, matchedPrefix, method }) {
@@ -70,7 +70,6 @@ async function notifyFromRequest({ req, body, matchedPrefix, method }) {
   if (cleanPath.includes('/arch')) return;
 
   const labelMap = {
-    '/api/projects': { noun: 'Project', type: 'project' },
     '/api/users': { noun: 'User', type: 'user' },
   };
   const label = labelMap[matchedPrefix];
@@ -82,14 +81,6 @@ async function notifyFromRequest({ req, body, matchedPrefix, method }) {
 
   let projectId =
     body?.project_id || body?.data?.project_id || req.body?.project_id || null;
-
-  const projectUuidMatch = cleanPath.match(/^\/api\/projects\/([0-9a-fA-F-]{36})/i);
-  if (matchedPrefix === '/api/projects' && projectUuidMatch) {
-    projectId = projectId || projectUuidMatch[1];
-  }
-  if (matchedPrefix === '/api/projects' && method === 'POST' && body?.id) {
-    projectId = projectId || body.id;
-  }
 
   const userProjectPath = cleanPath.match(/^\/api\/users\/([^/]+)\/projects\/([^/]+)$/);
   if (matchedPrefix === '/api/users' && userProjectPath && method === 'DELETE') {
@@ -108,30 +99,6 @@ async function notifyFromRequest({ req, body, matchedPrefix, method }) {
   let title;
   let message;
   const type = label.type;
-
-  // POST /api/projects/:id/assignments
-  if (
-    matchedPrefix === '/api/projects' &&
-    cleanPath.includes('/assignments') &&
-    method === 'POST'
-  ) {
-    const projName = await getProjectName(projectId);
-    const assigneeId = req.body?.user_id;
-    let assigneeLabel = assigneeId ? `user #${assigneeId}` : 'a tester';
-    if (assigneeId) {
-      const [urows] = await pool.query(
-        'SELECT name, full_name FROM users WHERE id = ? LIMIT 1',
-        [assigneeId]
-      );
-      const u = urows[0];
-      if (u) assigneeLabel = u.full_name || u.name || assigneeLabel;
-    }
-    title = `Assignment: ${assigneeLabel} -> ${projName || 'project'}`;
-    message = `${actor} assigned tester ${assigneeLabel} to project "${projName || 'Unknown project'}".`;
-    const recipientIds = await resolveRecipientIds({ projectId, actorUserId: actorId });
-    await insertForRecipients({ recipientUserIds: recipientIds, title, message, type });
-    return;
-  }
 
   // POST /api/users/:userId/projects (admin assign alternate path)
   const userProjectsPost = cleanPath.match(/^\/api\/users\/([^/]+)\/projects$/);
@@ -157,7 +124,7 @@ async function notifyFromRequest({ req, body, matchedPrefix, method }) {
     return;
   }
 
-  // Default: users and projects
+  // Default: users
   title = entityName ? `${label.noun} "${entityName}" ${verb}` : `${label.noun} ${verb}`;
   message = entityName
     ? `${actor} ${verb} ${label.noun.toLowerCase()} "${entityName}"`
