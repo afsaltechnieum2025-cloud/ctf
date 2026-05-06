@@ -41,12 +41,14 @@ app.use(notifyMiddleware);
 
 const authRoutes       = require('./routes/auth');
 const usersRoutes      = require('./routes/user');
+const statsRoutes      = require('./routes/stats');
 
 // Public routes — no token needed
 app.use('/api/auth', authRoutes);
 
 // Protected routes — token required, expires 24h
 app.use('/api/users',         authMiddleware, usersRoutes);
+app.use('/api/stats',         authMiddleware, statsRoutes);
 app.use('/api/notifications', authMiddleware, notificationsRoutes);
 
 // Root endpoint
@@ -54,7 +56,8 @@ app.get('/', (req, res) => {
   res.json({
     message: 'Backend is running!',
     endpoints: {
-      users: '/api/users'
+      users: '/api/users',
+      stats: '/api/stats/dashboard',
     }
   });
 });

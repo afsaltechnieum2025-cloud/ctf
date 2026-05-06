@@ -28,7 +28,7 @@ export default function DashboardLayout({ children, title, description }: Dashbo
 
         {/* Header */}
         <header className="sticky top-0 z-40 border-b border-border/50 bg-background/80 backdrop-blur-xl">
-          <div className="flex items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
+          <div className="flex items-center justify-between gap-3 px-3 py-3 sm:px-5 sm:py-4 lg:px-8">
             <div className="min-w-0 pl-10 md:pl-0">
               <h1 className="text-xl font-bold truncate sm:text-2xl">{title}</h1>
               {description && (
@@ -43,8 +43,8 @@ export default function DashboardLayout({ children, title, description }: Dashbo
           </div>
         </header>
 
-        {/* Main Content */}
-        <main className="flex-1 overflow-auto p-4 sm:p-6">
+        {/* Main content — full width of column; pages should not add extra side gutters unless needed */}
+        <main className="flex-1 min-w-0 w-full overflow-auto px-3 py-4 sm:px-5 sm:py-5 lg:px-8 lg:py-6">
           {children}
         </main>
 

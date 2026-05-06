@@ -9,6 +9,11 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import KnowledgeBase from "./pages/KnowledgeBase";
 import Users from "./pages/Users";
+import CTF from "./pages/CTF";
+import ProductCourse from "./pages/ProductCourse";
+import ProductDetail from "./pages/ProductDetail";
+import ProductMcqs from "./pages/ProductMcqs";
+import ProductMcqTest from "./pages/ProductMcqTest";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +32,12 @@ const App = () => (
             {/* Protected routes */}
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/knowledge-base" element={<ProtectedRoute><KnowledgeBase /></ProtectedRoute>} />
+            <Route path="/ctf" element={<ProtectedRoute><CTF /></ProtectedRoute>} />
+            <Route path="/products" element={<ProtectedRoute><ProductCourse /></ProtectedRoute>} />
+            <Route path="/products/:slug" element={<ProtectedRoute><ProductDetail /></ProtectedRoute>} />
+            <Route path="/product-mcqs" element={<ProtectedRoute><ProductMcqs /></ProtectedRoute>} />
+            <Route path="/product-mcqs/:slug" element={<ProtectedRoute><ProductMcqTest /></ProtectedRoute>} />
+            <Route path="/product-course" element={<Navigate to="/products" replace />} />
             <Route path="/users" element={<ProtectedRoute><Users /></ProtectedRoute>} />
           </Routes>
         </BrowserRouter>

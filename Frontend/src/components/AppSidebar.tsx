@@ -6,12 +6,14 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
-  Pencil,
   Menu,
   Crown,
   Briefcase,
   Shield,
-  User
+  User,
+  Trophy,
+  BookOpen,
+  ListChecks,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -29,8 +31,13 @@ import { cn } from '@/lib/utils';
 import { useState, useEffect } from 'react';
 import logo from '@/assets/technieum-logo.png';
 
+const staffRoles = ['admin', 'manager', 'tester', 'pentester'] as const;
+
 const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['admin', 'manager', 'tester'] },
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: [...staffRoles] },
+  { name: 'Products', href: '/products', icon: BookOpen, roles: [...staffRoles] },
+  { name: 'Product MCQs', href: '/product-mcqs', icon: ListChecks, roles: [...staffRoles] },
+  { name: 'CTF', href: '/ctf', icon: Trophy, roles: [...staffRoles] },
   { name: 'Users', href: '/users', icon: Users, roles: ['admin', 'manager'] },
 ];
 
@@ -144,7 +151,11 @@ export default function AppSidebar() {
         {/* Navigation */}
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
           {filteredNavigation.map((item) => {
-            const isActive = location.pathname === item.href;
+            const isActive =
+              location.pathname === item.href ||
+              (item.href === '/product-mcqs' && location.pathname.startsWith('/product-mcqs')) ||
+              (item.href === '/products' &&
+                (location.pathname === '/products' || location.pathname.startsWith('/products/')));
             return (
               <Link
                 key={item.name}
