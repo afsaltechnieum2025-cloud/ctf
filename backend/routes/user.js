@@ -56,8 +56,8 @@ router.get('/', requireAdminOrManager, async (req, res) => {
   }
 });
 
-// ── POST create new user (admin only) ────────────────────────────────────────
-router.post('/', requireAdmin, async (req, res) => {
+// ── POST create new user (admin + manager) ───────────────────────────────────
+router.post('/', requireAdminOrManager, async (req, res) => {
   try {
     const { name, email, password, role, full_name } = req.body;
 
@@ -81,6 +81,9 @@ router.post('/', requireAdmin, async (req, res) => {
     if (role && !VALID_ROLES.includes(role)) {
       return res.status(400).json({ error: 'Invalid role specified' });
     }
+    if (req.user.role === 'manager' && role === 'admin') {
+      return res.status(403).json({ error: 'Forbidden: Manager cannot create admin users' });
+    }
 
     const [existing] = await db.query('SELECT id FROM users WHERE email = ?', [email]);
     if (existing.length > 0) {
@@ -99,14 +102,27 @@ router.post('/', requireAdmin, async (req, res) => {
   }
 });
 
-// ── PUT update user role (admin only) ────────────────────────────────────────
-router.put('/:id/role', requireAdmin, async (req, res) => {
+// ── PUT update user role (admin + manager) ───────────────────────────────────
+router.put('/:id/role', requireAdminOrManager, async (req, res) => {
   try {
     const { role } = req.body;
 
     const VALID_ROLES = ['admin', 'manager', 'tester', 'client'];
     if (!role || !VALID_ROLES.includes(role)) {
       return res.status(400).json({ error: 'Invalid role specified' });
+    }
+
+    if (req.user.role === 'manager') {
+      if (role === 'admin') {
+        return res.status(403).json({ error: 'Forbidden: Manager cannot promote users to admin' });
+      }
+      const [targetRows] = await db.query('SELECT role FROM users WHERE id = ?', [req.params.id]);
+      if (targetRows.length === 0) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      if (targetRows[0].role === 'admin') {
+        return res.status(403).json({ error: 'Forbidden: Manager cannot modify admin users' });
+      }
     }
 
     const [result] = await db.query('UPDATE users SET role = ? WHERE id = ?', [role, req.params.id]);
@@ -120,12 +136,22 @@ router.put('/:id/role', requireAdmin, async (req, res) => {
   }
 });
 
-// ── DELETE user (admin only) ─────────────────────────────────────────────────
-router.delete('/:id', requireAdmin, async (req, res) => {
+// ── DELETE user (admin + manager) ────────────────────────────────────────────
+router.delete('/:id', requireAdminOrManager, async (req, res) => {
   try {
     // Prevent admin from deleting themselves
     if (parseInt(req.params.id) === req.user.id) {
       return res.status(400).json({ error: 'You cannot delete your own account' });
+    }
+
+    if (req.user.role === 'manager') {
+      const [targetRows] = await db.query('SELECT role FROM users WHERE id = ?', [req.params.id]);
+      if (targetRows.length === 0) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      if (targetRows[0].role === 'admin') {
+        return res.status(403).json({ error: 'Forbidden: Manager cannot delete admin users' });
+      }
     }
 
     const [result] = await db.query('DELETE FROM users WHERE id = ?', [req.params.id]);

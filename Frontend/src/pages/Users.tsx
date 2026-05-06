@@ -271,13 +271,14 @@ export default function Users() {
         headers: authHeaders(),
         body: JSON.stringify({ role: newRole }),
       });
-      if (!res.ok) throw new Error();
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to update role');
       toast.success('Role updated successfully');
       setIsRoleDialogOpen(false);
       fetchUsers();
       triggerNotifyRefresh();
-    } catch {
-      toast.error('Failed to update role');
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to update role');
     } finally {
       setIsSaving(false);
     }
@@ -292,14 +293,15 @@ export default function Users() {
         method: 'DELETE',
         headers: authHeaders(),
       });
-      if (!res.ok) throw new Error();
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to delete user');
       toast.success('User deleted successfully!');
       setIsDeleteDialogOpen(false);
       setUserToDelete(null);
       fetchUsers();
       triggerNotifyRefresh();
-    } catch {
-      toast.error('Failed to delete user');
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to delete user');
     } finally {
       setIsDeleting(false);
     }

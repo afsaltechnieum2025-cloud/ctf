@@ -13,18 +13,6 @@ import {
   TrendingUp,
   Users,
 } from 'lucide-react';
-import {
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  Area,
-  AreaChart,
-} from 'recharts';
 import { API as API_BASE } from '@/utils/api';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -240,43 +228,6 @@ export default function Dashboard() {
     };
   }, [user, role, projects, userFindings]);
 
-  // ─── Chart data ───────────────────────────────────────────────────────────────
-
-  const severityData = [
-    { name: 'Critical', value: stats.criticalFindings, color: 'hsl(var(--critical))' },
-    { name: 'High', value: stats.highFindings, color: 'hsl(var(--high))' },
-    { name: 'Medium', value: stats.mediumFindings, color: 'hsl(var(--medium))' },
-    { name: 'Low', value: stats.lowFindings, color: 'hsl(var(--low))' },
-    { name: 'Informational', value: stats.infoFindings, color: 'hsl(var(--muted-foreground))' },
-  ];
-
-  const monthlyData = useMemo(() => {
-    const months: Record<string, { month: string; findings: number; projects: Set<string> }> = {};
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-    userFindings.forEach(f => {
-      const d = new Date(f.created_at);
-      const key = `${d.getFullYear()}-${d.getMonth()}`;
-      if (!months[key]) {
-        months[key] = { month: monthNames[d.getMonth()], findings: 0, projects: new Set() };
-      }
-      months[key].findings++;
-      months[key].projects.add(f.project_id);
-    });
-
-    const now = new Date();
-    return Array.from({ length: 6 }, (_, i) => {
-      const d = new Date(now.getFullYear(), now.getMonth() - 4 + i, 1);
-      const key = `${d.getFullYear()}-${d.getMonth()}`;
-      const entry = months[key];
-      return {
-        month: monthNames[d.getMonth()],
-        findings: entry?.findings ?? 0,
-        projects: entry ? entry.projects.size : 0,
-      };
-    });
-  }, [userFindings]);
-
   // ─── Visible projects: admin+manager see all, tester sees only assigned ───────
 
   const visibleProjects = useMemo(() => {
@@ -388,116 +339,6 @@ export default function Dashboard() {
               <div className="flex items-center gap-2 mt-3 text-sm text-destructive">
                 <Clock className="h-4 w-4" />
                 <span>Requires attention</span>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* ── Severity Breakdown ───────────────────────────────────────────── */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-          {(
-            [
-              { label: 'Critical', count: stats.criticalFindings, bg: 'bg-red-500/10', text: 'text-red-500', border: 'border-red-500/30' },
-              { label: 'High', count: stats.highFindings, bg: 'bg-orange-500/10', text: 'text-orange-500', border: 'border-orange-500/30' },
-              { label: 'Medium', count: stats.mediumFindings, bg: 'bg-orange-400/10', text: 'text-orange-400', border: 'border-orange-400/30' },
-              { label: 'Low', count: stats.lowFindings, bg: 'bg-primary/5', text: 'text-primary/50', border: 'border-primary/15' },
-              { label: 'Informational', count: stats.infoFindings, bg: 'bg-muted', text: 'text-muted-foreground', border: 'border-border' },
-            ] as const
-          ).map(({ label, count, bg, text, border }) => (
-            <Card key={label} className={`p-4 border ${border} ${bg} animate-fade-in`}>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className={`text-2xl font-bold ${text}`}>{count}</p>
-                  <p className="text-xs text-muted-foreground">{label}</p>
-                </div>
-                <AlertTriangle className={`h-5 w-5 ${text}`} />
-              </div>
-            </Card>
-          ))}
-        </div>
-
-        {/* ── Charts Row ───────────────────────────────────────────────────── */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-          <Card className="animate-fade-in" style={{ animationDelay: '200ms' }}>
-            <CardHeader>
-              <CardTitle className="text-lg">Findings by Severity</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={severityData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={50}
-                      outerRadius={80}
-                      paddingAngle={5}
-                      dataKey="value"
-                    >
-                      {severityData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: 'hsl(var(--chart-tooltip-bg))',
-                        border: '1px solid hsl(var(--chart-tooltip-border))',
-                        borderRadius: '8px',
-                      }}
-                      itemStyle={{ color: 'hsl(var(--chart-tooltip-fg))' }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="flex flex-wrap gap-3 justify-center mt-4">
-                {severityData.map((item) => (
-                  <div key={item.name} className="flex items-center gap-2">
-                    <div className="h-3 w-3 rounded-full" style={{ backgroundColor: item.color }} />
-                    <span className="text-xs text-muted-foreground">
-                      {item.name} ({item.value})
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="lg:col-span-2 animate-fade-in" style={{ animationDelay: '250ms' }}>
-            <CardHeader>
-              <CardTitle className="text-lg">Findings Trend</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={monthlyData}>
-                    <defs>
-                      <linearGradient id="colorFindings" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="hsl(var(--chart-series-accent))" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="hsl(var(--chart-series-accent))" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--chart-grid))" />
-                    <XAxis dataKey="month" stroke="hsl(var(--chart-axis))" />
-                    <YAxis stroke="hsl(var(--chart-axis))" />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: 'hsl(var(--chart-tooltip-bg))',
-                        border: '1px solid hsl(var(--chart-tooltip-border))',
-                        borderRadius: '8px',
-                      }}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="findings"
-                      stroke="hsl(var(--chart-series-accent))"
-                      strokeWidth={2}
-                      fillOpacity={1}
-                      fill="url(#colorFindings)"
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
               </div>
             </CardContent>
           </Card>
