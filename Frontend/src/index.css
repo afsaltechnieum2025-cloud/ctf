@@ -1,0 +1,249 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* -------------------------------------------------------------------------- */
+/* Theme — brand + black-first surfaces (Tailwind uses hsl(var(--token)))     */
+/* Raw hex/rgb tokens mirror @theme for gradients, shadows, one-off CSS.      */
+/* -------------------------------------------------------------------------- */
+
+@layer base {
+  :root {
+    /* Brand (hex) */
+    --color-brand: #e85d04;
+    --color-brand-strong: #c2410c;
+    --color-brand-soft: #9a3412;
+
+    /* Surfaces (hex) */
+    --color-page: #000000;
+    --color-bg-subtle: #030303;
+    --color-bg-inset: #000000;
+    --color-panel: #0a0a0a;
+    --color-panel-hover: #141414;
+    --color-surface-popover: #0a0a0a;
+
+    /* Text (hex) */
+    --color-muted: #a1a1aa;
+    --color-heading: #fafafa;
+    --color-on-light-muted: #6b7280;
+    --color-footer-link: rgb(255 255 255 / 0.72);
+
+    /* Borders (hex) */
+    --color-border: #27272a;
+    --color-border-strong: #3f3f46;
+
+    /* HSL channels for shadcn / Tailwind */
+    --brand-1: 24 96% 46%;
+    --brand-2: 20 92% 44%;
+    --brand-3: 17 88% 40%;
+    --brand-4: 15 79% 34%;
+
+    --surface-page: 0 0% 0%;
+    --surface-subtle: 0 0% 1%;
+    --surface-inset: 0 0% 0%;
+    --surface-panel: 0 0% 4%;
+    --surface-panel-hover: 0 0% 8%;
+    --surface-popover: 0 0% 4%;
+
+    --line: 240 6% 16%;
+    --line-strong: 240 5% 26%;
+
+    --background: var(--surface-page);
+    --foreground: 0 0% 98%;
+
+    --card: var(--surface-panel);
+    --card-foreground: 0 0% 98%;
+
+    --popover: var(--surface-popover);
+    --popover-foreground: 0 0% 98%;
+
+    --primary: var(--brand-1);
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: var(--surface-panel-hover);
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: var(--surface-subtle);
+    --muted-foreground: 240 5% 66%;
+
+    --accent: var(--brand-3);
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: var(--line);
+    --input: var(--line);
+    --ring: var(--brand-1);
+
+    --radius: 0.75rem;
+
+    /* Severity (findings / charts) */
+    --critical: 0 84% 60%;
+    --high: 17 88% 48%;
+    --medium: 38 92% 50%;
+    --low: 142 70% 45%;
+    --info: 199 89% 48%;
+
+    --gradient-primary: linear-gradient(
+      135deg,
+      var(--color-brand),
+      var(--color-brand-strong),
+      var(--color-brand-soft)
+    );
+    --gradient-technieum: linear-gradient(
+      135deg,
+      var(--color-brand) 0%,
+      var(--color-brand-strong) 52%,
+      var(--color-brand-soft) 100%
+    );
+    --gradient-sidebar: linear-gradient(
+      180deg,
+      hsl(var(--surface-panel)),
+      hsl(var(--surface-page))
+    );
+
+    --shadow-md:
+      rgb(0 0 0 / 0.5) 0 12px 24px -4px,
+      rgb(0 0 0 / 0.35) 0 8px 16px -6px;
+    --shadow-dropdown:
+      0 24px 48px rgb(0 0 0 / 0.65),
+      0 0 0 1px rgb(255 255 255 / 0.04);
+    --shadow-glow: 0 0 32px hsl(var(--primary) / 0.28);
+
+    --sidebar-background: var(--surface-panel);
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: var(--brand-1);
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: var(--surface-panel-hover);
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: var(--line-strong);
+    --sidebar-ring: var(--brand-1);
+
+    --chart-grid: var(--border);
+    --chart-axis: var(--muted-foreground);
+    --chart-tooltip-bg: var(--popover);
+    --chart-tooltip-border: var(--border);
+    --chart-tooltip-fg: var(--foreground);
+    --chart-series-accent: var(--high);
+
+    --font-sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: ui-monospace, Consolas, monospace;
+    --max-width-site: 1200px;
+
+    --breakpoint-xs: 480px;
+  }
+}
+
+html {
+  font-size: 14px;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: var(--font-sans);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
+    color: var(--color-heading);
+  }
+
+  code, pre {
+    font-family: var(--font-mono);
+  }
+}
+
+@layer utilities {
+  .gradient-primary {
+    background: var(--gradient-primary);
+  }
+
+  .gradient-sidebar {
+    background: var(--gradient-sidebar);
+  }
+
+  .gradient-technieum {
+    background: var(--gradient-technieum);
+  }
+
+  .text-gradient {
+    background: var(--gradient-technieum);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .glow {
+    box-shadow: var(--shadow-glow);
+  }
+
+  .shadow-dropdown {
+    box-shadow: var(--shadow-dropdown);
+  }
+
+  .shadow-elevated {
+    box-shadow: var(--shadow-md);
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out forwards;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-background;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-border rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-muted-foreground/50;
+}
+
+/* Recharts — use theme tokens */
+.recharts-cartesian-grid-horizontal line,
+.recharts-cartesian-grid-vertical line {
+  stroke: hsl(var(--chart-grid));
+}
+
+.recharts-text {
+  fill: hsl(var(--chart-axis));
+}
