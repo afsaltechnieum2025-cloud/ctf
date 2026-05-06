@@ -77,7 +77,7 @@ router.post('/', requireAdminOrManager, async (req, res) => {
     }
 
     // Valid roles validation
-    const VALID_ROLES = ['admin', 'manager', 'tester', 'client'];
+    const VALID_ROLES = ['admin', 'manager', 'tester', 'pentester', 'client'];
     if (role && !VALID_ROLES.includes(role)) {
       return res.status(400).json({ error: 'Invalid role specified' });
     }
@@ -107,7 +107,7 @@ router.put('/:id/role', requireAdminOrManager, async (req, res) => {
   try {
     const { role } = req.body;
 
-    const VALID_ROLES = ['admin', 'manager', 'tester', 'client'];
+    const VALID_ROLES = ['admin', 'manager', 'tester', 'pentester', 'client'];
     if (!role || !VALID_ROLES.includes(role)) {
       return res.status(400).json({ error: 'Invalid role specified' });
     }
