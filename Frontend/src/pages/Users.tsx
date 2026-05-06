@@ -418,9 +418,6 @@ export default function Users() {
       <SelectItem value="tester">
         <div className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-primary" />Tester</div>
       </SelectItem>
-      <SelectItem value="client">
-        <div className="flex items-center gap-2"><Building2 className="h-4 w-4 text-primary" />Client</div>
-      </SelectItem>
     </>
   );
 
@@ -428,7 +425,6 @@ export default function Users() {
     admins: users.filter(u => u.role === 'admin').length,
     managers: users.filter(u => u.role === 'manager').length,
     testers: users.filter(u => u.role === 'tester').length,
-    clients: users.filter(u => u.role === 'client').length,
   };
 
   if (isLoading) {
@@ -446,12 +442,11 @@ export default function Users() {
       <div className="space-y-6 px-4 sm:px-0">
 
         {/* ── Stats ──────────────────────────────────────────────────────── */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[
             { label: 'Admins', count: roleStats.admins, Icon: Crown },
             { label: 'Managers', count: roleStats.managers, Icon: Briefcase },
             { label: 'Testers', count: roleStats.testers, Icon: ShieldCheck },
-            { label: 'Clients', count: roleStats.clients, Icon: Building2 },
           ].map(({ label, count, Icon }, i) => (
             <Card key={label} className="animate-fade-in hover:shadow-lg transition-all" style={{ animationDelay: `${i * 50}ms` }}>
               <CardContent className="p-4">

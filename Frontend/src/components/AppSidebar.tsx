@@ -126,7 +126,7 @@ export default function AppSidebar() {
               />
               <div className="flex flex-col leading-tight">
                 <span className="font-bold text-sm text-gradient">Technieum</span>
-                <span className="font-semibold text-xs text-muted-foreground">OffSec Portal</span>
+                <span className="font-semibold text-xs text-muted-foreground">CTF Portal</span>
               </div>
             </Link>
           )}

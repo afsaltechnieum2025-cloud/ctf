@@ -290,7 +290,7 @@ export function UserProfileDialog({
 
         children.push(
             new Paragraph({ spacing: { before: 400 }, children: [new TextRun('')] }),
-            new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: 'CONFIDENTIAL – Technieum Security Assessment Services', bold: true, color: 'f97316' })] }),
+            new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: 'CONFIDENTIAL – Technieum CTF Portal', bold: true, color: 'f97316' })] }),
             new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: `Generated on: ${currentDate}`, size: 18, color: '6b7280' })] }),
         );
 

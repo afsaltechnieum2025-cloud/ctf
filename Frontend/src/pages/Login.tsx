@@ -261,7 +261,7 @@ export default function Login() {
                 className="text-3xl font-bold text-gradient mb-6"
                 style={{ animation: mounted ? 'slideInLeft 0.8s 0.25s ease both' : 'none', opacity: mounted ? 1 : 0 }}
               >
-                Technieum OffSec
+                Technieum CTF Portal
               </h2>
               <p
                 className="text-xl text-muted-foreground mb-12"
@@ -307,7 +307,7 @@ export default function Login() {
                     className="h-14 w-auto max-w-[min(220px,85vw)] object-contain"
                   />
                 </div>
-                <h1 className="text-xl font-semibold text-gradient">OffSec Operations</h1>
+                <h1 className="text-xl font-semibold text-gradient">Technieum CTF Portal</h1>
               </div>
 
               {/* Card */}
@@ -423,7 +423,7 @@ export default function Login() {
                 alt="Technieum"
                 className="h-8 w-auto max-w-[140px] object-contain"
               />
-              <span className="text-sm font-medium text-muted-foreground">OffSec Operations</span>
+              <span className="text-sm font-medium text-muted-foreground">Technieum CTF Portal</span>
             </div>
             <p className="text-xs text-muted-foreground">
               © {currentYear} Technieum. All rights reserved.

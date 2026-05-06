@@ -12,10 +12,10 @@ export default function Footer() {
             alt="Technieum"
             className="h-8 w-auto max-w-[140px] object-contain"
           />
-          <span className="text-sm font-medium text-muted-foreground">Technieum OffSec Operations</span>
+          <span className="text-sm font-medium text-muted-foreground">Technieum CTF Portal</span>
         </div>
         <p className="text-xs text-[var(--color-footer-link)]">
-          © {currentYear} Technieum. All rights reserved.
+          © 2023 - {currentYear} Technieum. All rights reserved.
         </p>
       </div>
     </footer>
