@@ -1,13 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import {
@@ -18,11 +12,6 @@ import {
   Clock,
   TrendingUp,
   Users,
-  Download,
-  Eye,
-  Loader2,
-  FileText,
-  Shield,
 } from 'lucide-react';
 import {
   XAxis,
@@ -36,7 +25,7 @@ import {
   Area,
   AreaChart,
 } from 'recharts';
-import { API as API_BASE, docsPdfUrl } from '@/utils/api';
+import { API as API_BASE } from '@/utils/api';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -120,13 +109,6 @@ export default function Dashboard() {
   const [showAllMembers, setShowAllMembers] = useState(false);
   const [showAllProjects, setShowAllProjects] = useState(false);
 
-  /** In-app PDF preview (avoids blank-tab + cross-origin blob navigation issues). */
-  const [pdfDialogOpen, setPdfDialogOpen] = useState(false);
-  const [pdfLoading, setPdfLoading] = useState(false);
-  const [pdfBlobUrl, setPdfBlobUrl] = useState<string | null>(null);
-  const [pdfTitle, setPdfTitle] = useState('');
-  const pdfPreviewGenRef = useRef(0);
-
   const MEMBERS_LIMIT = 4;
   const PROJECTS_LIMIT = 4;
 
@@ -189,79 +171,6 @@ export default function Dashboard() {
     } catch (error) {
       console.error('Error fetching team members:', error);
       toast.error('Failed to load team members');
-    }
-  };
-
-  // ─── Doc URL map ─────────────────────────────────────────────────────────────
-
-  const docMap: Record<string, string> = {
-    AD: docsPdfUrl('AD'),
-  };
-
-  // ─── Preview (modal — reliable; new-tab + blob after async is often blocked → about:blank)
-
-  const closePdfPreview = () => {
-    pdfPreviewGenRef.current += 1;
-    setPdfBlobUrl((prev) => {
-      if (prev) URL.revokeObjectURL(prev);
-      return null;
-    });
-    setPdfDialogOpen(false);
-    setPdfLoading(false);
-  };
-
-  const handlePreview = async (docKey: string) => {
-    const filePath = docMap[docKey];
-    if (!filePath) return;
-
-    const gen = ++pdfPreviewGenRef.current;
-    setPdfTitle(docKey);
-    setPdfDialogOpen(true);
-    setPdfLoading(true);
-    setPdfBlobUrl(null);
-
-    try {
-      const response = await fetch(filePath);
-      if (!response.ok) throw new Error('Failed to fetch file');
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      if (pdfPreviewGenRef.current !== gen) {
-        URL.revokeObjectURL(url);
-        return;
-      }
-      setPdfBlobUrl(url);
-    } catch (error) {
-      if (pdfPreviewGenRef.current === gen) {
-        console.error('Preview error:', error);
-        toast.error(`Failed to preview ${docKey} documentation`);
-        closePdfPreview();
-      }
-    } finally {
-      if (pdfPreviewGenRef.current === gen) setPdfLoading(false);
-    }
-  };
-
-  // ─── Download (blob fetch) ────────────────────────────────────────────────────
-
-  const handleDownload = async (docKey: string) => {
-    const filePath = docMap[docKey];
-    if (!filePath) return;
-    try {
-      const response = await fetch(filePath);
-      if (!response.ok) throw new Error('Failed to fetch file');
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = blobUrl;
-      a.download = `${docKey}_Documentation.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(blobUrl);
-      toast.success(`${docKey} documentation downloaded`);
-    } catch (error) {
-      console.error('Download error:', error);
-      toast.error(`Failed to download ${docKey} documentation`);
     }
   };
 
@@ -743,112 +652,7 @@ export default function Dashboard() {
 
         </div>
 
-        {/* ── Documentation Section — all roles ───────────────────────────── */}
-        <Card
-          className="animate-fade-in overflow-hidden border-orange-500/20 bg-card/90 shadow-sm"
-          style={{ animationDelay: '300ms' }}
-        >
-          <CardHeader className="relative border-b border-orange-500/10 bg-gradient-to-r from-orange-500/[0.08] via-primary/[0.04] to-transparent pb-6 pt-6">
-            <div className="pointer-events-none absolute -right-20 -top-20 h-40 w-40 rounded-full bg-primary/10 blur-3xl" aria-hidden />
-            <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-primary/25 bg-primary/10 shadow-sm">
-                <Shield className="h-7 w-7 text-primary" />
-              </div>
-              <div className="min-w-0 space-y-1">
-                <CardTitle className="text-xl font-semibold tracking-tight sm:text-2xl">
-                  Technieum Offensive Security Tools
-                </CardTitle>
-                <CardDescription className="text-sm leading-relaxed">
-                  Official PDF guides for each capability—preview in the browser or download for offline use.
-                </CardDescription>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="p-4 sm:p-6">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-              {[
-                { title: 'AD Suite', subtitle: 'Active Directory Pentesting', icon: Shield, docKey: 'AD' },
-              ].map((doc, index) => {
-                const Icon = doc.icon;
-                return (
-                  <div
-                    key={doc.title}
-                    className="group relative flex flex-col rounded-xl border border-border/70 bg-card/95 p-4 shadow-sm transition-all duration-300 animate-fade-in hover:border-primary/30 hover:shadow-md"
-                    style={{ animationDelay: `${320 + index * 40}ms` }}
-                  >
-                    <div
-                      className="pointer-events-none absolute inset-x-0 top-0 h-0.5 rounded-t-xl bg-gradient-to-r from-orange-400/0 via-primary/50 to-orange-400/0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                      aria-hidden
-                    />
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-orange-500/20 bg-orange-500/[0.08] text-primary transition-colors group-hover:border-orange-500/35 group-hover:bg-orange-500/[0.12]">
-                        <Icon className="h-5 w-5" />
-                      </div>
-                      <Badge variant="outline" className="shrink-0 border-border/80 bg-muted/40 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-                        <FileText className="mr-1 h-3 w-3" />
-                        PDF
-                      </Badge>
-                    </div>
-                    <div className="mt-3 min-w-0 flex-1 space-y-0.5">
-                      <h3 className="font-semibold leading-tight text-foreground">{doc.title}</h3>
-                      <p className="text-xs leading-snug text-muted-foreground">{doc.subtitle}</p>
-                    </div>
-                    <div className="mt-2.5 grid grid-cols-2 gap-2">
-                      <button
-                        type="button"
-                        title="Preview PDF"
-                        onClick={() => handlePreview(doc.docKey)}
-                        className="inline-flex h-9 w-full items-center justify-center rounded-md border border-border/80 bg-secondary/40 text-foreground transition-colors hover:bg-secondary/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                      >
-                        <Eye className="h-4 w-4 shrink-0" />
-                        <span className="sr-only">Preview PDF</span>
-                      </button>
-                      <button
-                        type="button"
-                        title="Download PDF"
-                        onClick={() => handleDownload(doc.docKey)}
-                        className="inline-flex h-9 w-full items-center justify-center rounded-md text-sm font-medium gradient-technieum text-primary-foreground shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                      >
-                        <Download className="h-4 w-4 shrink-0" />
-                        <span className="sr-only">Download PDF</span>
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
-
       </div>
-
-      <Dialog
-        open={pdfDialogOpen}
-        onOpenChange={(open) => {
-          if (!open) closePdfPreview();
-        }}
-      >
-        <DialogContent className="flex max-h-[min(90vh,900px)] w-[min(96vw,1200px)] max-w-5xl flex-col gap-0 overflow-hidden p-0 sm:max-w-5xl">
-          <DialogHeader className="shrink-0 border-b px-6 py-4 pr-14">
-            <DialogTitle>{pdfTitle} — Documentation</DialogTitle>
-          </DialogHeader>
-          <div className="relative min-h-[60vh] flex-1 bg-muted/30">
-            {pdfLoading && (
-              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 text-muted-foreground">
-                <Loader2 className="h-10 w-10 animate-spin text-primary" aria-hidden />
-                <span className="text-sm">Loading PDF…</span>
-              </div>
-            )}
-            {!pdfLoading && pdfBlobUrl ? (
-              <iframe
-                title="PDF preview"
-                src={pdfBlobUrl}
-                className="h-[min(75vh,800px)] w-full border-0"
-              />
-            ) : null}
-          </div>
-        </DialogContent>
-      </Dialog>
     </DashboardLayout>
   );
 }

@@ -9,12 +9,9 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Projects from "./pages/Projects";
 import ProjectDetail from "./pages/ProjectDetail";
-import Findings from "./pages/Findings";
 import KnowledgeBase from "./pages/KnowledgeBase";
 import Users from "./pages/Users";
 import NotFound from "./pages/NotFound";
-import Trending from "./pages/trending";
-import HallofFame from "./pages/checklist";
 
 const queryClient = new QueryClient();
 
@@ -34,10 +31,7 @@ const App = () => (
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
             <Route path="/projects/:id" element={<ProtectedRoute><ProjectDetail /></ProtectedRoute>} />
-            <Route path="/findings" element={<ProtectedRoute><Findings /></ProtectedRoute>} />
             <Route path="/knowledge-base" element={<ProtectedRoute><KnowledgeBase /></ProtectedRoute>} />
-            <Route path="/HallofFame" element={<ProtectedRoute><HallofFame /></ProtectedRoute>} />
-            <Route path="/trending" element={<ProtectedRoute><Trending /></ProtectedRoute>} />
             <Route path="/users" element={<ProtectedRoute><Users /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>

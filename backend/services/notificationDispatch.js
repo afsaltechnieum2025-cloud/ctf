@@ -1,13 +1,5 @@
 const pool = require('../db');
 
-const FINDING_TYPE_LABEL = {
-  pentest: 'Pentest',
-  sast: 'SAST',
-  asm: 'ASM',
-  llm: 'LLM/AI',
-  secret: 'Secret',
-};
-
 async function getPrivilegedUserIds() {
   const [rows] = await pool.query(
     `SELECT id FROM users WHERE role IN ('admin', 'manager')`
@@ -69,7 +61,7 @@ function verbPast(method) {
 /**
  * @param {import('express').Request} req
  * @param {object} body - JSON body passed to res.json()
- * @param {string} matchedPrefix - e.g. '/api/findings'
+ * @param {string} matchedPrefix - e.g. '/api/projects'
  * @param {string} method
  */
 async function notifyFromRequest({ req, body, matchedPrefix, method }) {
@@ -78,11 +70,8 @@ async function notifyFromRequest({ req, body, matchedPrefix, method }) {
   if (cleanPath.includes('/arch')) return;
 
   const labelMap = {
-    '/api/findings': { noun: 'Finding', type: 'finding' },
     '/api/projects': { noun: 'Project', type: 'project' },
     '/api/users': { noun: 'User', type: 'user' },
-    '/api/wof': { noun: 'Wall of Fame entry', type: 'general' },
-    '/api/trending': { noun: 'Trending note', type: 'general' },
   };
   const label = labelMap[matchedPrefix];
   if (!label) return;
@@ -93,18 +82,6 @@ async function notifyFromRequest({ req, body, matchedPrefix, method }) {
 
   let projectId =
     body?.project_id || body?.data?.project_id || req.body?.project_id || null;
-
-  const findingUuidMatch = cleanPath.match(/^\/api\/findings\/([0-9a-fA-F-]{36})/i);
-  let findingRow = null;
-  if (matchedPrefix === '/api/findings' && findingUuidMatch) {
-    const fid = findingUuidMatch[1];
-    const [rows] = await pool.query(
-      'SELECT project_id, title, finding_type FROM findings WHERE id = ? LIMIT 1',
-      [fid]
-    );
-    findingRow = rows[0] || null;
-    if (findingRow?.project_id) projectId = projectId || findingRow.project_id;
-  }
 
   const projectUuidMatch = cleanPath.match(/^\/api\/projects\/([0-9a-fA-F-]{36})/i);
   if (matchedPrefix === '/api/projects' && projectUuidMatch) {
@@ -127,10 +104,6 @@ async function notifyFromRequest({ req, body, matchedPrefix, method }) {
     req.body?.name ||
     req.body?.title ||
     null;
-
-  if (matchedPrefix === '/api/findings') {
-    entityName = body?.title || findingRow?.title || entityName;
-  }
 
   let title;
   let message;
@@ -184,36 +157,7 @@ async function notifyFromRequest({ req, body, matchedPrefix, method }) {
     return;
   }
 
-  // Findings: include tester name and finding title
-  if (matchedPrefix === '/api/findings') {
-    const bugTitle = entityName || 'Finding';
-    const ft = String(body?.finding_type || req.body?.finding_type || findingRow?.finding_type || '')
-      .toLowerCase();
-    const typeLabel = FINDING_TYPE_LABEL[ft] || 'Finding';
-    const projName = projectId ? await getProjectName(projectId) : null;
-    const projectBit = projName ? ` on project "${projName}"` : '';
-
-    if (cleanPath.includes('/pocs')) {
-      const fname = body?.file_name || 'POC';
-      title = `POC added: "${fname}"`;
-      message = `Tester ${actor} uploaded a POC (${fname}) for finding "${bugTitle}"${projectBit}.`;
-    } else if (method === 'POST') {
-      title = `New ${typeLabel} finding: "${bugTitle}"`;
-      message = `Tester ${actor} added ${typeLabel} finding "${bugTitle}"${projectBit}.`;
-    } else if (method === 'DELETE') {
-      title = `Finding removed: "${bugTitle}"`;
-      message = `${actor} removed finding "${bugTitle}"${projectBit}.`;
-    } else {
-      title = `Finding updated: "${bugTitle}"`;
-      message = `${actor} updated finding "${bugTitle}"${projectBit}.`;
-    }
-
-    const recipientIds = await resolveRecipientIds({ projectId, actorUserId: actorId });
-    await insertForRecipients({ recipientUserIds: recipientIds, title, message, type });
-    return;
-  }
-
-  // Default: users, projects, trending, wall of fame
+  // Default: users and projects
   title = entityName ? `${label.noun} "${entityName}" ${verb}` : `${label.noun} ${verb}`;
   message = entityName
     ? `${actor} ${verb} ${label.noun.toLowerCase()} "${entityName}"`

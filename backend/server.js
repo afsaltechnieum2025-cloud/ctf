@@ -40,24 +40,18 @@ const notificationsRoutes = require('./routes/notifications');
 app.use(notifyMiddleware);
 
 const authRoutes       = require('./routes/auth');
-const trendingRoutes   = require('./routes/trending');
 const usersRoutes      = require('./routes/user');
 const projectsRoutes   = require('./routes/projects');
-const findingsRoutes   = require('./routes/findings');
-const halloffameRoutes = require('./routes/halloffame');
 const archRoutes       = require('./routes/arch');
 
 // Public routes — no token needed
 app.use('/api/auth', authRoutes);
 
 // Protected routes — token required, expires 24h
-app.use('/api/trending',      authMiddleware, trendingRoutes);
 app.use('/api/users',         authMiddleware, usersRoutes);
 // Arch must be mounted BEFORE /api/projects to prevent /:id catching /arch/bulk
 app.use('/api/projects', authMiddleware, archRoutes);
 app.use('/api/projects',      authMiddleware, projectsRoutes);
-app.use('/api/findings',      authMiddleware, findingsRoutes);
-app.use('/api/wof',           authMiddleware, halloffameRoutes);
 app.use('/api/notifications', authMiddleware, notificationsRoutes);
 
 // Root endpoint
@@ -65,10 +59,8 @@ app.get('/', (req, res) => {
   res.json({
     message: 'Backend is running!',
     endpoints: {
-      hallOfFame: '/api/wof',
       users: '/api/users',
-      projects: '/api/projects',
-      findings: '/api/findings'
+      projects: '/api/projects'
     }
   });
 });
@@ -82,6 +74,4 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
-  console.log(`📍 Wall of Fame API: http://localhost:${PORT}/api/wof`);
-  console.log(`📍 Test endpoint: http://localhost:${PORT}/api/wof/test`);
 });

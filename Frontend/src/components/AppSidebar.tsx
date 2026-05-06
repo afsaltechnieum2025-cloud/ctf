@@ -3,15 +3,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import {
   LayoutDashboard,
   FolderKanban,
-  Bug,
   Users,
   LogOut,
   ChevronLeft,
   ChevronRight,
   Pencil,
-  TrendingUp,
   Menu,
-  Trophy,
   Crown,
   Briefcase,
   Shield,
@@ -36,9 +33,6 @@ import logo from '@/assets/technieum-logo.png';
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['admin', 'manager', 'tester'] },
   { name: 'Projects', href: '/projects', icon: FolderKanban, roles: ['admin', 'manager', 'tester'] },
-  { name: 'Findings', href: '/findings', icon: Bug, roles: ['admin', 'manager', 'tester'] },
-  { name: 'Wall Of Fame', href: '/HallofFame', icon: Trophy, roles: ['admin', 'manager', 'tester'] },
-  { name: 'Trending', href: '/trending', icon: TrendingUp, roles: ['admin', 'manager', 'tester'] },
   { name: 'Users', href: '/users', icon: Users, roles: ['admin', 'manager'] },
 ];
 
