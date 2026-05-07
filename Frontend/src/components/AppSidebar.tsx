@@ -35,8 +35,8 @@ const staffRoles = ['admin', 'manager', 'tester', 'pentester'] as const;
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: [...staffRoles] },
-  { name: 'Products', href: '/products', icon: BookOpen, roles: [...staffRoles] },
-  { name: 'Product MCQs', href: '/product-mcqs', icon: ListChecks, roles: [...staffRoles] },
+  { name: 'Courses', href: '/courses', icon: BookOpen, roles: [...staffRoles] },
+  { name: 'Products Quiz', href: '/product-mcqs', icon: ListChecks, roles: [...staffRoles] },
   { name: 'CTF', href: '/ctf', icon: Trophy, roles: [...staffRoles] },
   { name: 'Users', href: '/users', icon: Users, roles: ['admin', 'manager'] },
 ];
@@ -133,7 +133,7 @@ export default function AppSidebar() {
               />
               <div className="flex flex-col leading-tight">
                 <span className="font-bold text-sm text-gradient">Technieum</span>
-                <span className="font-semibold text-xs text-muted-foreground">CTF Portal</span>
+                <span className="font-semibold text-xs text-muted-foreground">Upskill portal</span>
               </div>
             </Link>
           )}
@@ -154,8 +154,8 @@ export default function AppSidebar() {
             const isActive =
               location.pathname === item.href ||
               (item.href === '/product-mcqs' && location.pathname.startsWith('/product-mcqs')) ||
-              (item.href === '/products' &&
-                (location.pathname === '/products' || location.pathname.startsWith('/products/')));
+              (item.href === '/courses' &&
+                (location.pathname === '/courses' || location.pathname.startsWith('/courses/')));
             return (
               <Link
                 key={item.name}

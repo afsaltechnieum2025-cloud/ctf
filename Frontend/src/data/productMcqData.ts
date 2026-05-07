@@ -1,5 +1,5 @@
 /**
- * MCQ banks aligned with `productSalesBriefs.ts` so reps practice the same story as the product pages.
+ * Quiz question banks aligned with `productSalesBriefs.ts` so reps practice the same story as the product pages.
  * Five stems × five options; `correctIndex` points to the answer that matches the sales brief.
  */
 export const MCQ_QUESTION_STEMS = [

@@ -66,12 +66,12 @@ export default function Dashboard() {
 
         <Card className="border-border/60 bg-card/50">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Products</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Courses</CardTitle>
             <Package className="h-4 w-4 text-primary" aria-hidden />
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold tabular-nums tracking-tight">{PRODUCT_COUNT}</p>
-            <p className="mt-1 text-xs text-muted-foreground">Vendor profiles on the Products page</p>
+            <p className="mt-1 text-xs text-muted-foreground">Vendor profiles on the Courses page</p>
           </CardContent>
         </Card>
       </div>

@@ -1,10 +1,10 @@
 export type CatalogProduct = {
-  /** URL segment for MCQ routes, e.g. `/product-mcqs/appknox` */
+  /** URL segment for course detail + Products Quiz routes, e.g. `/courses/appknox`, `/product-mcqs/appknox` */
   slug: string;
   name: string;
   /** Official site (reference; not shown in the Products grid UI). */
   url: string;
-  /** Optional: `/products/your-file.png` under `public/products/`. */
+  /** Optional: e.g. `/courses/your-file.png` under `public/courses/` (or legacy `public/products/`). */
   image?: string;
   description: string;
 };

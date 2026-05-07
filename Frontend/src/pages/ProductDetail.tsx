@@ -2,6 +2,7 @@ import { Link, useParams } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { isProductLinkedToCourses } from '@/data/courseTopics';
 import { getProductBySlug } from '@/data/productCatalog';
 import { getSalesBrief } from '@/data/productSalesBriefs';
 import { ArrowLeft, Check, ExternalLink, MessageCircle, Target, Users } from 'lucide-react';
@@ -13,14 +14,14 @@ export default function ProductDetail() {
 
   if (!product || !brief) {
     return (
-      <DashboardLayout title="Products" description="">
+      <DashboardLayout title="Courses" description="">
         <Card className="w-full max-w-full border-border/60 sm:max-w-md">
           <CardHeader>
-            <CardTitle>Product not found</CardTitle>
+            <CardTitle>Course not found</CardTitle>
           </CardHeader>
           <CardContent>
             <Button variant="outline" asChild>
-              <Link to="/products">Back to Products</Link>
+              <Link to="/courses">Back to Courses</Link>
             </Button>
           </CardContent>
         </Card>
@@ -32,9 +33,9 @@ export default function ProductDetail() {
     <DashboardLayout title={product.name} description="">
       <div className="mb-6 flex flex-wrap items-center gap-3">
         <Button variant="ghost" size="sm" className="gap-1.5 pl-0 text-muted-foreground hover:text-foreground" asChild>
-          <Link to="/products">
+          <Link to="/courses">
             <ArrowLeft className="h-4 w-4" aria-hidden />
-            All products
+            All courses
           </Link>
         </Button>
         <Button variant="outline" size="sm" className="gap-1.5" asChild>
@@ -139,9 +140,11 @@ export default function ProductDetail() {
             </CardContent>
           </Card>
 
-          <Button className="w-full gradient-technieum font-semibold text-primary-foreground" asChild>
-            <Link to={`/product-mcqs/${product.slug}`}>Practice: MCQ for {product.name}</Link>
-          </Button>
+          {isProductLinkedToCourses(product.slug) ? (
+            <Button className="w-full gradient-technieum font-semibold text-primary-foreground" asChild>
+              <Link to={`/product-mcqs/${product.slug}`}>Practice: Products Quiz for {product.name}</Link>
+            </Button>
+          ) : null}
         </div>
       </div>
     </DashboardLayout>
