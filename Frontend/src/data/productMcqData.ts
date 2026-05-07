@@ -11,7 +11,8 @@ export const MCQ_QUESTION_STEMS = [
 ] as const;
 
 export type McqQuestion = {
-  options: [string, string, string, string, string];
+  question?: string;
+  options: readonly string[];
   correctIndex: number;
 };
 
@@ -20,53 +21,53 @@ export type ProductMcqSet = readonly McqQuestion[];
 export const MCQS_BY_SLUG: Record<string, ProductMcqSet> = {
   'protectt-ai': [
     {
+      question: 'Protectt.ai is headquartered in:',
+      correctIndex: 1,
+      options: [
+        'Bengaluru, India',
+        'Mumbai, India',
+        'Dubai, UAE',
+        'Singapore',
+      ],
+    },
+    {
+      question: 'The Protectt.ai module that performs Runtime Application Self-Protection is called:',
       correctIndex: 2,
       options: [
-        'A mobile binary lab scanner that only runs before the app is released.',
-        'A DSPM platform that maps sensitive files to employee identities.',
-        'A runtime-focused vendor that keeps live apps trustworthy after release—guarding tampering, fakes, and fraud in the wild.',
-        'An endpoint XDR suite that stitches MalOps across laptops and servers.',
-        'An API gateway that discovers partner traffic and bot abuse.',
+        'CodeProtectt',
+        'AppBind',
+        'AppProtectt',
+        'FraudGuard',
       ],
     },
     {
-      correctIndex: 0,
-      options: [
-        'Reduce fraud and brand damage from cloned or modified apps; give teams evidence on abnormal behavior; shorten field investigations.',
-        'Replace every SIEM, SOAR, and ticketing integration with one SKU.',
-        'Provide guaranteed zero false positives for all static analysis findings.',
-        'Host the customer’s production database in the vendor’s cloud by default.',
-        'Automatically rewrite insecure mobile source code in every pull request.',
-      ],
-    },
-    {
+      question: 'AppBind, by Protectt.ai, is primarily used for:',
       correctIndex: 1,
       options: [
-        'Be the only tool you need for GDPR documentation without legal review.',
-        'Replace a full secure-SDLC and pre-release testing program by itself—it adds runtime integrity after ship, not instead of design-time work.',
-        'Act as a full replacement for enterprise PKI, IAM, and network segmentation alone.',
-        'Host the customer’s production database in the vendor’s cloud by default.',
-        'Eliminate the need for any fraud operations center or chargeback process.',
+        'Physically gluing two phones together',
+        'SIM and device binding to lock banking access to verified devices and SIMs',
+        'Submitting apps to the app store',
+        'Marketing analytics and customer segmentation',
       ],
     },
     {
+      question: 'Protectt.ai’s controls are most directly mapped to which Indian regulators’ directives?',
       correctIndex: 1,
       options: [
-        'Only relevant for desktop browsers from the early 2000s.',
-        'Runtime and post-release visibility that static scans miss—strong for mobile-first, high-fraud industries.',
-        'Cheaper seat pricing than every consumer antivirus combined.',
-        'Exclusive focus on mainframe green-screen session recording.',
-        'Native replacement for a general-purpose CRM pipeline.',
+        'SEBI only',
+        'RBI Digital Payment Security Controls, NPCI SIM/Device Binding, and SEBI Cyber Resilience Framework',
+        'IRDAI (insurance regulator) only',
+        'None — Protectt.ai is exclusively UAE-focused',
       ],
     },
     {
-      correctIndex: 4,
+      question: 'Protectt.ai’s announced distribution partner for the Middle East and Africa is:',
+      correctIndex: 1,
       options: [
-        'Cannot integrate with any mobile CI/CD pipeline.',
-        'Requires uninstalling all endpoint agents before rollout.',
-        'Ignores telemetry from rooted or jailbroken devices entirely.',
-        'Ships only as hardware dongles for retail POS terminals.',
-        'Still needs thoughtful SDK/integration and pairing with secure SDLC—not “drop in and ignore.”',
+        'Help AG',
+        'TechBridge Distribution MEA',
+        'Spire Solutions',
+        'StarLink',
       ],
     },
   ],

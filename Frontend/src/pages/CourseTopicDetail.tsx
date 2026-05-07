@@ -3,8 +3,10 @@ import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ImageIcon, ArrowLeft } from 'lucide-react';
+import RaspFoundationContent from '@/components/course/RaspFoundationContent';
 import { getCourseTopicBySlug } from '@/data/courseTopics';
-import { getProductBySlug, PRODUCTS } from '@/data/productCatalog';
+import { getCourseTopicQuizBySlug } from '@/data/courseTopicQuizData';
+import { getProductBySlug } from '@/data/productCatalog';
 
 export default function CourseTopicDetail() {
   const { topicSlug } = useParams<{ topicSlug: string }>();
@@ -24,6 +26,7 @@ export default function CourseTopicDetail() {
   const relatedProducts = topic.relatedProductSlugs
     .map((slug) => getProductBySlug(slug))
     .filter((p): p is NonNullable<typeof p> => Boolean(p));
+  const hasTopicQuiz = Boolean(getCourseTopicQuizBySlug(topic.slug));
 
   return (
     <DashboardLayout title={topic.title}>
@@ -36,16 +39,20 @@ export default function CourseTopicDetail() {
         </Button>
       </div>
 
-      <p className="mb-8 max-w-3xl text-base text-muted-foreground">{topic.tagline}</p>
+      {hasTopicQuiz ? (
+        <div className="sticky bottom-4 z-20 mb-8">
+          <Button className="w-full gradient-technieum font-semibold text-primary-foreground shadow-lg" asChild>
+            <Link to={`/courses/topics/${topic.slug}/quiz`}>
+              Practice: Topic Quiz for {topic.slug.toUpperCase()}
+            </Link>
+          </Button>
+        </div>
+      ) : null}
 
       <section className="mb-12">
         <h2 className="mb-4 text-lg font-semibold tracking-tight text-foreground">
           Vendors in this topic
         </h2>
-        <p className="mb-4 max-w-2xl text-sm text-muted-foreground">
-          Products from our catalog that emphasize runtime or in-app protection aligned
-          with this topic. Select a card to open the full sales brief and Products Quiz.
-        </p>
         {relatedProducts.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             No linked products yet. Browse all vendors on the{' '}
@@ -92,29 +99,8 @@ export default function CourseTopicDetail() {
         )}
       </section>
 
-      <article className="max-w-3xl space-y-10 border-t border-border/60 pt-10">
-        {topic.sections.map((sec) => (
-          <section key={sec.heading}>
-            <h2 className="mb-3 text-lg font-semibold tracking-tight text-foreground">
-              {sec.heading}
-            </h2>
-            <div className="space-y-3 text-sm leading-relaxed text-muted-foreground sm:text-[15px]">
-              {sec.paragraphs.map((p, i) => (
-                <p key={i}>{p}</p>
-              ))}
-            </div>
-          </section>
-        ))}
-      </article>
+      {topic.slug === 'rasp' ? <RaspFoundationContent /> : null}
 
-      <p className="mt-12 text-xs text-muted-foreground">
-        Full vendor list ({PRODUCTS.length}): use the dashboard product grid or open each
-        from{' '}
-        <Link to="/courses" className="text-primary underline-offset-4 hover:underline">
-          Courses
-        </Link>
-        .
-      </p>
     </DashboardLayout>
   );
 }
