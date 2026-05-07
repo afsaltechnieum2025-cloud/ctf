@@ -6,60 +6,115 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useAuth } from '@/contexts/AuthContext';
 import { submitQuizAttempt } from '@/api/quizAttempts';
 import { useCourseLinkedProductSlugs } from '@/hooks/useCourseLinkedProductSlugs';
+import { useProductMcqQuiz } from '@/hooks/useProductMcqQuiz';
+import { useLearningProducts } from '@/hooks/useLearningProducts';
 import { isProductLinkedToCourses } from '@/data/courseTopics';
 import { getProductBySlug } from '@/data/productCatalog';
-import { getMcqSetForSlug, MCQ_QUESTION_STEMS } from '@/data/productMcqData';
-import { ArrowLeft, CheckCircle2, XCircle } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Loader2, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-const TOTAL = MCQ_QUESTION_STEMS.length;
 
 export default function ProductMcqTest() {
   const { slug } = useParams<{ slug: string }>();
   const { token } = useAuth();
   const { slugs: courseLinkedSlugs, loading: courseLinksLoading } = useCourseLinkedProductSlugs();
-  const product = slug ? getProductBySlug(slug) : undefined;
-  const questions = slug ? getMcqSetForSlug(slug) : undefined;
+  const { products: apiProducts, loading: productsLoading } = useLearningProducts();
+  const { questions, loading: quizLoading, error: quizError } = useProductMcqQuiz(slug);
+
+  const product = useMemo(() => {
+    if (!slug) return undefined;
+    return apiProducts.find((p) => p.slug === slug) ?? getProductBySlug(slug);
+  }, [slug, apiProducts]);
+
+  const total = questions.length;
 
   const [step, setStep] = useState(0);
-  const [answers, setAnswers] = useState<(number | null)[]>(() => Array(TOTAL).fill(null));
+  const [answers, setAnswers] = useState<(number | null)[]>([]);
   const [phase, setPhase] = useState<'quiz' | 'results'>('quiz');
 
   useEffect(() => {
     setStep(0);
-    setAnswers(Array(TOTAL).fill(null));
+    setAnswers(Array(total).fill(null));
     setPhase('quiz');
-  }, [slug]);
+  }, [slug, total]);
 
   const inCourses = Boolean(
-    slug &&
-      (courseLinksLoading ? isProductLinkedToCourses(slug) : courseLinkedSlugs.includes(slug)),
+    slug && (courseLinksLoading ? isProductLinkedToCourses(slug) : courseLinkedSlugs.includes(slug)),
   );
-  const invalid =
-    !slug || !product || !inCourses || !questions || questions.length !== TOTAL;
 
   const score = useMemo(() => {
-    if (!questions || phase !== 'results') return { correct: 0, wrong: 0 };
+    if (!questions.length || phase !== 'results') return { correct: 0, wrong: 0 };
     let correct = 0;
-    for (let i = 0; i < TOTAL; i++) {
+    for (let i = 0; i < questions.length; i += 1) {
       const picked = answers[i];
       if (picked === null || picked === undefined) continue;
       if (picked === questions[i].correctIndex) correct += 1;
     }
-    const answeredWrongOrSkipped = TOTAL - correct;
-    return { correct, wrong: answeredWrongOrSkipped };
+    return { correct, wrong: questions.length - correct };
   }, [questions, answers, phase]);
 
-  if (invalid) {
+  const baseInvalid = !slug || !product || !inCourses;
+
+  if (baseInvalid) {
     return (
       <DashboardLayout title="Products Quiz">
         <div className="mx-auto w-full max-w-lg min-w-0 space-y-4">
           <p className="text-sm leading-relaxed text-muted-foreground">
-            {!product
+            {!slug || !product
               ? 'We could not find this vendor or the link is invalid.'
               : !inCourses
                 ? 'Products Quiz only includes vendors linked from Courses. Open a course topic to see which vendors are in scope.'
-                : 'This product does not have a quiz set up yet.'}
+                : null}
+          </p>
+          <Button asChild variant="outline" className="w-full sm:w-auto">
+            <Link to="/product-mcqs">Back to Products Quiz</Link>
+          </Button>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (productsLoading && !apiProducts.length) {
+    return (
+      <DashboardLayout title="Products Quiz">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+          Loading…
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (quizLoading) {
+    return (
+      <DashboardLayout title={product ? `${product.name} — Products Quiz` : 'Products Quiz'}>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+          Loading quiz…
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (quizError) {
+    return (
+      <DashboardLayout title="Products Quiz">
+        <p className="text-sm text-destructive" role="alert">
+          {quizError}
+        </p>
+        <Button asChild variant="outline" className="mt-4">
+          <Link to="/product-mcqs">Back to Products Quiz</Link>
+        </Button>
+      </DashboardLayout>
+    );
+  }
+
+  if (!questions.length) {
+    return (
+      <DashboardLayout title="Products Quiz">
+        <div className="mx-auto w-full max-w-lg min-w-0 space-y-4">
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            This product does not have any quiz questions in the database yet. Add rows to{' '}
+            <code className="rounded bg-muted px-1 py-0.5 text-xs">product_mcq_questions</code> for this vendor.
           </p>
           <Button asChild variant="outline" className="w-full sm:w-auto">
             <Link to="/product-mcqs">Back to Products Quiz</Link>
@@ -70,7 +125,7 @@ export default function ProductMcqTest() {
   }
 
   const current = questions[step];
-  const stem = current.question ?? MCQ_QUESTION_STEMS[step];
+  const stem = current.question?.trim() || `Question ${step + 1}`;
 
   const setChoice = (optionIndex: number) => {
     setAnswers((prev) => {
@@ -81,12 +136,12 @@ export default function ProductMcqTest() {
   };
 
   const goDone = () => {
-    if (!slug || !questions) {
+    if (!slug || !questions.length) {
       setPhase('results');
       return;
     }
     let correct = 0;
-    for (let i = 0; i < TOTAL; i += 1) {
+    for (let i = 0; i < questions.length; i += 1) {
       const picked = answers[i];
       if (picked !== null && picked !== undefined && picked === questions[i].correctIndex) {
         correct += 1;
@@ -98,7 +153,7 @@ export default function ProductMcqTest() {
         quizType: 'product_mcq',
         subjectSlug: slug,
         scoreCorrect: correct,
-        scoreTotal: TOTAL,
+        scoreTotal: questions.length,
       }).catch(() => {
         /* non-blocking */
       });
@@ -107,11 +162,11 @@ export default function ProductMcqTest() {
 
   const retake = () => {
     setStep(0);
-    setAnswers(Array(TOTAL).fill(null));
+    setAnswers(Array(total).fill(null));
     setPhase('quiz');
   };
 
-  const progressPct = ((step + 1) / TOTAL) * 100;
+  const progressPct = total > 0 ? ((step + 1) / total) * 100 : 0;
 
   if (phase === 'results') {
     return (
@@ -135,11 +190,11 @@ export default function ProductMcqTest() {
                 {product.name}
               </CardTitle>
               <p className="mt-2 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                You scored {score.correct} / {TOTAL}
+                You scored {score.correct} / {total}
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
                 {score.wrong} incorrect or unanswered ·{' '}
-                {TOTAL > 0 ? Math.round((100 * score.correct) / TOTAL) : 0}% correct
+                {total > 0 ? Math.round((100 * score.correct) / total) : 0}% correct
               </p>
             </CardHeader>
             <CardContent className="pt-6">
@@ -174,29 +229,29 @@ export default function ProductMcqTest() {
     );
   }
 
-  const isLast = step === TOTAL - 1;
+  const isLast = step === total - 1;
   const selected = answers[step];
 
   return (
     <DashboardLayout
       title={`${product.name} — Products Quiz`}
-      description={`Question ${step + 1} of ${TOTAL}`}
+      description={`Question ${step + 1} of ${total}`}
     >
-        <div className="mx-auto mb-6 w-full max-w-3xl min-w-0">
-          <Button asChild variant="ghost" size="sm" className="-ml-2 gap-1 text-muted-foreground">
-            <Link to="/product-mcqs">
-              <ArrowLeft className="h-4 w-4" aria-hidden />
-              Products Quiz
-            </Link>
-          </Button>
-        </div>
+      <div className="mx-auto mb-6 w-full max-w-3xl min-w-0">
+        <Button asChild variant="ghost" size="sm" className="-ml-2 gap-1 text-muted-foreground">
+          <Link to="/product-mcqs">
+            <ArrowLeft className="h-4 w-4" aria-hidden />
+            Products Quiz
+          </Link>
+        </Button>
+      </div>
 
       <div className="mx-auto w-full max-w-3xl min-w-0 space-y-6">
         <div className="min-w-0 space-y-2">
           <div className="flex min-w-0 items-center justify-between gap-3 text-sm">
             <span className="font-medium text-foreground">Progress</span>
             <span className="tabular-nums text-muted-foreground">
-              {step + 1} / {TOTAL}
+              {step + 1} / {total}
             </span>
           </div>
           <div
@@ -204,8 +259,8 @@ export default function ProductMcqTest() {
             role="progressbar"
             aria-valuenow={step + 1}
             aria-valuemin={1}
-            aria-valuemax={TOTAL}
-            aria-label={`Question ${step + 1} of ${TOTAL}`}
+            aria-valuemax={total}
+            aria-label={`Question ${step + 1} of ${total}`}
           >
             <div
               className="h-full rounded-full bg-primary transition-[width] duration-200 ease-out"
@@ -269,7 +324,11 @@ export default function ProductMcqTest() {
               Previous
             </Button>
             {!isLast ? (
-              <Button type="button" className="w-full sm:w-auto sm:min-w-[8.5rem]" onClick={() => setStep((s) => Math.min(TOTAL - 1, s + 1))}>
+              <Button
+                type="button"
+                className="w-full sm:w-auto sm:min-w-[8.5rem]"
+                onClick={() => setStep((s) => Math.min(total - 1, s + 1))}
+              >
                 Next
               </Button>
             ) : (
