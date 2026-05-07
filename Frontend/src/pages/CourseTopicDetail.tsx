@@ -5,30 +5,35 @@ import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/ca
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ChevronLeft, ChevronRight, ImageIcon } from 'lucide-react';
 import RaspFoundationContent from '@/components/course/RaspFoundationContent';
-import { getCourseTopicBySlug } from '@/data/courseTopics';
-import { getCourseTopicQuizBySlug } from '@/data/courseTopicQuizData';
+import CourseTopicSections from '@/components/course/CourseTopicSections';
+import { useCourseTopicBySlug } from '@/hooks/useCourseTopicBySlug';
+import { useLearningProducts } from '@/hooks/useLearningProducts';
+import { useTopicQuiz } from '@/hooks/useTopicQuiz';
 import { getProductBySlug } from '@/data/productCatalog';
+import type { CatalogProduct } from '@/data/productCatalog';
 import { cn } from '@/lib/utils';
+
+function resolveRelatedProducts(
+  slugs: string[],
+  apiProducts: CatalogProduct[]
+): CatalogProduct[] {
+  return slugs
+    .map((slug) => apiProducts.find((p) => p.slug === slug) ?? getProductBySlug(slug))
+    .filter((p): p is CatalogProduct => Boolean(p));
+}
 
 export default function CourseTopicDetail() {
   const { topicSlug } = useParams<{ topicSlug: string }>();
-  const topic = topicSlug ? getCourseTopicBySlug(topicSlug) : undefined;
+  const { topic, loading: topicLoading, error: topicError } = useCourseTopicBySlug(topicSlug);
+  const { products: apiProducts, loading: productsLoading } = useLearningProducts();
+  const { questions: quizQuestions, loading: quizLoading } = useTopicQuiz(topic?.slug);
 
-  if (!topic) {
-    return (
-      <DashboardLayout title="Topic not found">
-        <p className="text-muted-foreground">This course topic does not exist.</p>
-        <Button asChild variant="outline" className="mt-4">
-          <Link to="/courses">Back to courses</Link>
-        </Button>
-      </DashboardLayout>
-    );
-  }
-
-  const relatedProducts = topic.relatedProductSlugs
-    .map((slug) => getProductBySlug(slug))
-    .filter((p): p is NonNullable<typeof p> => Boolean(p));
-  const hasTopicQuiz = Boolean(getCourseTopicQuizBySlug(topic.slug));
+  const relatedProducts = topic
+    ? resolveRelatedProducts(topic.relatedProductSlugs, apiProducts)
+    : [];
+  const hasTopicQuiz = !quizLoading && quizQuestions.length > 0;
+  const showRaspFoundationFallback =
+    topic?.slug === 'rasp' && (!topic.sections || topic.sections.length === 0);
 
   const vendorScrollRef = useRef<HTMLDivElement>(null);
   const [vendorScrollState, setVendorScrollState] = useState({ canPrev: false, canNext: true });
@@ -65,6 +70,40 @@ export default function CourseTopicDetail() {
     el.scrollBy({ left: direction * step, behavior: 'smooth' });
   };
 
+  if (topicLoading && !topic) {
+    return (
+      <DashboardLayout title="Courses">
+        <p className="text-sm text-muted-foreground" aria-busy="true">
+          Loading topic…
+        </p>
+      </DashboardLayout>
+    );
+  }
+
+  if (topicError) {
+    return (
+      <DashboardLayout title="Courses">
+        <p className="text-sm text-destructive" role="alert">
+          {topicError}
+        </p>
+        <Button asChild variant="outline" className="mt-4">
+          <Link to="/courses">Back to courses</Link>
+        </Button>
+      </DashboardLayout>
+    );
+  }
+
+  if (!topic) {
+    return (
+      <DashboardLayout title="Topic not found">
+        <p className="text-muted-foreground">This course topic does not exist.</p>
+        <Button asChild variant="outline" className="mt-4">
+          <Link to="/courses">Back to courses</Link>
+        </Button>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout title={topic.title}>
       <div className={hasTopicQuiz ? 'pb-24' : undefined}>
@@ -77,11 +116,21 @@ export default function CourseTopicDetail() {
           </Button>
         </div>
 
+        {topic.tagline ? (
+          <p className="mb-8 max-w-3xl text-sm leading-relaxed text-muted-foreground sm:text-base">{topic.tagline}</p>
+        ) : null}
+
+        {topic.sections && topic.sections.length > 0 ? (
+          <CourseTopicSections sections={topic.sections} />
+        ) : showRaspFoundationFallback ? (
+          <RaspFoundationContent />
+        ) : null}
+
         <section className="mb-12">
-          <h2 className="mb-4 text-lg font-semibold tracking-tight text-foreground">
-            Vendors in this topic
-          </h2>
-          {relatedProducts.length === 0 ? (
+          <h2 className="mb-4 text-lg font-semibold tracking-tight text-foreground">Vendors in this topic</h2>
+          {productsLoading && relatedProducts.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Loading vendors…</p>
+          ) : relatedProducts.length === 0 ? (
             <p className="text-sm text-muted-foreground">
               No linked products yet. Browse all vendors on the{' '}
               <Link to="/dashboard" className="text-primary underline-offset-4 hover:underline">
@@ -168,7 +217,6 @@ export default function CourseTopicDetail() {
           )}
         </section>
 
-        {topic.slug === 'rasp' ? <RaspFoundationContent /> : null}
       </div>
 
       {hasTopicQuiz ? (
@@ -180,7 +228,6 @@ export default function CourseTopicDetail() {
           </Button>
         </div>
       ) : null}
-
     </DashboardLayout>
   );
 }

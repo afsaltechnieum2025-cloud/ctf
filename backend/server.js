@@ -42,6 +42,7 @@ app.use(notifyMiddleware);
 const authRoutes       = require('./routes/auth');
 const usersRoutes      = require('./routes/user');
 const statsRoutes      = require('./routes/stats');
+const learningRoutes   = require('./routes/learning');
 
 // Public routes — no token needed
 app.use('/api/auth', authRoutes);
@@ -50,6 +51,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users',         authMiddleware, usersRoutes);
 app.use('/api/stats',         authMiddleware, statsRoutes);
 app.use('/api/notifications', authMiddleware, notificationsRoutes);
+app.use('/api/learning',      authMiddleware, learningRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {
@@ -58,6 +60,7 @@ app.get('/', (req, res) => {
     endpoints: {
       users: '/api/users',
       stats: '/api/stats/dashboard',
+      learning: '/api/learning/course-topics',
     }
   });
 });

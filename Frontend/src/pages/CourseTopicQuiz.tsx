@@ -3,16 +3,16 @@ import { Link, useParams } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { getCourseTopicBySlug } from '@/data/courseTopics';
-import { getCourseTopicQuizBySlug } from '@/data/courseTopicQuizData';
+import { useCourseTopicBySlug } from '@/hooks/useCourseTopicBySlug';
+import { useTopicQuiz } from '@/hooks/useTopicQuiz';
 import { ArrowLeft, CheckCircle2, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function CourseTopicQuiz() {
   const { topicSlug } = useParams<{ topicSlug: string }>();
-  const topic = topicSlug ? getCourseTopicBySlug(topicSlug) : undefined;
-  const questions = topicSlug ? getCourseTopicQuizBySlug(topicSlug) : undefined;
-  const total = questions?.length ?? 0;
+  const { topic, loading: topicLoading, error: topicError } = useCourseTopicBySlug(topicSlug);
+  const { questions, loading: quizLoading, error: quizError } = useTopicQuiz(topicSlug);
+  const total = questions.length;
 
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<number[]>([]);
@@ -24,16 +24,39 @@ export default function CourseTopicQuiz() {
     setPhase('quiz');
   }, [topicSlug, total]);
 
-  const invalid = !topicSlug || !topic || !questions || total === 0;
-
   const score = useMemo(() => {
-    if (!questions) return { correct: 0, wrong: 0 };
+    if (!questions.length) return { correct: 0, wrong: 0 };
     let correct = 0;
     for (let i = 0; i < questions.length; i += 1) {
       if (answers[i] === questions[i].correctIndex) correct += 1;
     }
     return { correct, wrong: questions.length - correct };
   }, [answers, questions]);
+
+  if (topicLoading || quizLoading) {
+    return (
+      <DashboardLayout title="Topic Quiz">
+        <p className="text-sm text-muted-foreground" aria-busy="true">
+          Loading quiz…
+        </p>
+      </DashboardLayout>
+    );
+  }
+
+  if (topicError || quizError) {
+    return (
+      <DashboardLayout title="Topic Quiz">
+        <p className="text-sm text-destructive" role="alert">
+          {topicError || quizError}
+        </p>
+        <Button asChild variant="outline" className="mt-4">
+          <Link to="/courses">Back to Courses</Link>
+        </Button>
+      </DashboardLayout>
+    );
+  }
+
+  const invalid = !topicSlug || !topic || total === 0;
 
   if (invalid) {
     return (

@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { useCourseLinkedProductSlugs } from '@/hooks/useCourseLinkedProductSlugs';
 import { isProductLinkedToCourses } from '@/data/courseTopics';
 import { getProductBySlug } from '@/data/productCatalog';
 import { getMcqSetForSlug, MCQ_QUESTION_STEMS } from '@/data/productMcqData';
@@ -13,6 +14,7 @@ const TOTAL = MCQ_QUESTION_STEMS.length;
 
 export default function ProductMcqTest() {
   const { slug } = useParams<{ slug: string }>();
+  const { slugs: courseLinkedSlugs, loading: courseLinksLoading } = useCourseLinkedProductSlugs();
   const product = slug ? getProductBySlug(slug) : undefined;
   const questions = slug ? getMcqSetForSlug(slug) : undefined;
 
@@ -26,7 +28,10 @@ export default function ProductMcqTest() {
     setPhase('quiz');
   }, [slug]);
 
-  const inCourses = Boolean(slug && isProductLinkedToCourses(slug));
+  const inCourses = Boolean(
+    slug &&
+      (courseLinksLoading ? isProductLinkedToCourses(slug) : courseLinkedSlugs.includes(slug)),
+  );
   const invalid =
     !slug || !product || !inCourses || !questions || questions.length !== TOTAL;
 

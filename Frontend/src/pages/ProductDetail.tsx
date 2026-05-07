@@ -3,6 +3,7 @@ import VendorDeepDiveSections from '@/components/course/VendorDeepDiveSections';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useCourseLinkedProductSlugs } from '@/hooks/useCourseLinkedProductSlugs';
 import { isProductLinkedToCourses } from '@/data/courseTopics';
 import { getProductBySlug } from '@/data/productCatalog';
 import { getSalesBrief } from '@/data/productSalesBriefs';
@@ -10,8 +11,14 @@ import { ArrowLeft, ExternalLink, MessageCircle, Target } from 'lucide-react';
 
 export default function ProductDetail() {
   const { slug } = useParams<{ slug: string }>();
+  const { slugs: courseLinkedSlugs, loading: courseLinksLoading } = useCourseLinkedProductSlugs();
   const product = slug ? getProductBySlug(slug) : undefined;
   const brief = slug ? getSalesBrief(slug) : undefined;
+
+  const hasProductQuiz = Boolean(
+    slug &&
+      (courseLinksLoading ? isProductLinkedToCourses(slug) : courseLinkedSlugs.includes(slug)),
+  );
 
   if (!product || !brief) {
     return (
@@ -29,8 +36,6 @@ export default function ProductDetail() {
       </DashboardLayout>
     );
   }
-
-  const hasProductQuiz = isProductLinkedToCourses(product.slug);
 
   return (
     <DashboardLayout title={product.name} description="">

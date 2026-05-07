@@ -2,21 +2,40 @@ import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useCourseLinkedProductSlugs } from '@/hooks/useCourseLinkedProductSlugs';
+import { useLearningProducts } from '@/hooks/useLearningProducts';
 import { getCourseLinkedProductSlugs } from '@/data/courseTopics';
 import { getProductBySlug } from '@/data/productCatalog';
 import type { CatalogProduct } from '@/data/productCatalog';
 import { ImageIcon } from 'lucide-react';
 
 export default function ProductMcqs() {
+  const { slugs, loading: topicsLoading, error } = useCourseLinkedProductSlugs();
+  const { products, loading: productsLoading } = useLearningProducts();
+
+  const displaySlugs = useMemo(
+    () => (topicsLoading ? [...getCourseLinkedProductSlugs()] : slugs),
+    [topicsLoading, slugs],
+  );
+
   const quizProducts = useMemo(() => {
-    return getCourseLinkedProductSlugs()
-      .map((slug) => getProductBySlug(slug))
+    return displaySlugs
+      .map((slug) => products.find((p) => p.slug === slug) ?? getProductBySlug(slug))
       .filter((p): p is CatalogProduct => Boolean(p));
-  }, []);
+  }, [displaySlugs, products]);
 
   return (
     <DashboardLayout title="Products Quiz">
-      {quizProducts.length === 0 ? (
+      {error ? (
+        <p className="mb-4 text-sm text-destructive" role="alert">
+          {error}
+        </p>
+      ) : null}
+      {topicsLoading || productsLoading ? (
+        <p className="text-sm text-muted-foreground" aria-busy="true">
+          Loading…
+        </p>
+      ) : quizProducts.length === 0 ? (
         <p className="text-sm leading-relaxed text-muted-foreground">
           No vendors are linked from Courses yet. Add products to a topic under{' '}
           <Link to="/courses" className="font-medium text-primary underline-offset-4 hover:underline">
