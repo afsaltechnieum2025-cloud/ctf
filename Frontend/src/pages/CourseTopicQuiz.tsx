@@ -7,8 +7,28 @@ import { useAuth } from '@/contexts/AuthContext';
 import { submitQuizAttempt } from '@/api/quizAttempts';
 import { useCourseTopicBySlug } from '@/hooks/useCourseTopicBySlug';
 import { useTopicQuiz } from '@/hooks/useTopicQuiz';
+import type { TopicQuizQuestion } from '@/data/courseTopicQuizData';
 import { ArrowLeft, CheckCircle2, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+/** Fisher–Yates shuffle of option order so the keyed answer (e.g. B) is not predictable. */
+function buildShuffledQuestion(q: TopicQuizQuestion): TopicQuizQuestion {
+  const order = [0, 1, 2, 3];
+  for (let i = order.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const t = order[i];
+    order[i] = order[j];
+    order[j] = t;
+  }
+  const options: [string, string, string, string] = [
+    q.options[order[0]],
+    q.options[order[1]],
+    q.options[order[2]],
+    q.options[order[3]],
+  ];
+  const correctIndex = order.findIndex((orig) => orig === q.correctIndex);
+  return { question: q.question, options, correctIndex };
+}
 
 export default function CourseTopicQuiz() {
   const { topicSlug } = useParams<{ topicSlug: string }>();
@@ -20,6 +40,12 @@ export default function CourseTopicQuiz() {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<number[]>([]);
   const [phase, setPhase] = useState<'quiz' | 'results'>('quiz');
+  const [shuffleToken, setShuffleToken] = useState(0);
+
+  const displayQuestions = useMemo(() => {
+    if (!questions.length) return [];
+    return questions.map(buildShuffledQuestion);
+  }, [questions, shuffleToken]);
 
   useEffect(() => {
     setStep(0);
@@ -28,13 +54,13 @@ export default function CourseTopicQuiz() {
   }, [topicSlug, total]);
 
   const score = useMemo(() => {
-    if (!questions.length) return { correct: 0, wrong: 0 };
+    if (!displayQuestions.length) return { correct: 0, wrong: 0 };
     let correct = 0;
-    for (let i = 0; i < questions.length; i += 1) {
-      if (answers[i] === questions[i].correctIndex) correct += 1;
+    for (let i = 0; i < displayQuestions.length; i += 1) {
+      if (answers[i] === displayQuestions[i].correctIndex) correct += 1;
     }
-    return { correct, wrong: questions.length - correct };
-  }, [answers, questions]);
+    return { correct, wrong: displayQuestions.length - correct };
+  }, [answers, displayQuestions]);
 
   if (topicLoading || quizLoading) {
     return (
@@ -77,7 +103,7 @@ export default function CourseTopicQuiz() {
   }
 
   const progressPct = ((step + 1) / total) * 100;
-  const current = questions[step];
+  const current = displayQuestions[step];
   const isLast = step === total - 1;
   const selected = answers[step];
 
@@ -90,13 +116,13 @@ export default function CourseTopicQuiz() {
   };
 
   const finishQuiz = () => {
-    if (!topicSlug || !questions.length) {
+    if (!topicSlug || !displayQuestions.length) {
       setPhase('results');
       return;
     }
     let correct = 0;
-    for (let i = 0; i < questions.length; i += 1) {
-      if (answers[i] === questions[i].correctIndex) correct += 1;
+    for (let i = 0; i < displayQuestions.length; i += 1) {
+      if (answers[i] === displayQuestions[i].correctIndex) correct += 1;
     }
     setPhase('results');
     if (token) {
@@ -104,7 +130,7 @@ export default function CourseTopicQuiz() {
         quizType: 'course_topic_quiz',
         subjectSlug: topicSlug,
         scoreCorrect: correct,
-        scoreTotal: questions.length,
+        scoreTotal: displayQuestions.length,
       }).catch(() => {
         /* non-blocking */
       });
@@ -163,6 +189,7 @@ export default function CourseTopicQuiz() {
                 variant="outline"
                 className="w-full sm:w-auto sm:min-w-[10rem]"
                 onClick={() => {
+                  setShuffleToken((n) => n + 1);
                   setStep(0);
                   setAnswers(Array(total).fill(-1));
                   setPhase('quiz');

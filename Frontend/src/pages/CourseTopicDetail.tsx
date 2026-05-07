@@ -32,8 +32,6 @@ export default function CourseTopicDetail() {
     ? resolveRelatedProducts(topic.relatedProductSlugs, apiProducts)
     : [];
   const hasTopicQuiz = !quizLoading && quizQuestions.length > 0;
-  const showRaspFoundationFallback =
-    topic?.slug === 'rasp' && (!topic.sections || topic.sections.length === 0);
 
   const vendorScrollRef = useRef<HTMLDivElement>(null);
   const [vendorScrollState, setVendorScrollState] = useState({ canPrev: false, canNext: true });
@@ -116,17 +114,7 @@ export default function CourseTopicDetail() {
           </Button>
         </div>
 
-        {topic.tagline ? (
-          <p className="mb-8 max-w-3xl text-sm leading-relaxed text-muted-foreground sm:text-base">{topic.tagline}</p>
-        ) : null}
-
-        {topic.sections && topic.sections.length > 0 ? (
-          <CourseTopicSections sections={topic.sections} />
-        ) : showRaspFoundationFallback ? (
-          <RaspFoundationContent />
-        ) : null}
-
-        <section className="mb-12">
+        <section className="mb-10">
           <h2 className="mb-4 text-lg font-semibold tracking-tight text-foreground">Vendors in this topic</h2>
           {productsLoading && relatedProducts.length === 0 ? (
             <p className="text-sm text-muted-foreground">Loading vendors…</p>
@@ -216,6 +204,16 @@ export default function CourseTopicDetail() {
             </div>
           )}
         </section>
+
+        {topic.tagline ? (
+          <p className="mb-8 max-w-3xl text-sm leading-relaxed text-muted-foreground sm:text-base">{topic.tagline}</p>
+        ) : null}
+
+        {topic.slug === 'rasp' ? (
+          <RaspFoundationContent />
+        ) : topic.sections && topic.sections.length > 0 ? (
+          <CourseTopicSections sections={topic.sections} />
+        ) : null}
 
       </div>
 
