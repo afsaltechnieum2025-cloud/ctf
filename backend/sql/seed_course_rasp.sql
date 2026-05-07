@@ -4,7 +4,7 @@
 -- Run in MySQL / MariaDB (e.g. phpMyAdmin, MySQL Workbench, or CLI):
 --   mysql -u root -p technieum_ctf < backend/sql/seed_course_rasp.sql
 -- Safe to re-run: removes previous rows for slug `rasp` only; upserts 4 products by slug.
--- After import: restart the API and open /courses (logged in).
+-- After import: restart the API and open /courses (logged in). `quiz_attempts` powers quiz score tracking.
 -- To refresh quiz INSERTs from TS: run `node backend/scripts/generate-rasp-quiz-sql.mjs`
 -- (writes UTF-8 fragment; paste into this file under the course_topic_quiz_questions INSERT).
 -- =============================================================================
@@ -75,6 +75,21 @@ CREATE TABLE IF NOT EXISTS `course_topic_quiz_questions` (
   PRIMARY KEY (`id`),
   KEY `idx_ctqq_topic` (`topic_id`),
   CONSTRAINT `fk_ctqq_topic` FOREIGN KEY (`topic_id`) REFERENCES `course_topics` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Quiz completions (POST /api/quiz-attempts, admin report GET /api/quiz-attempts/admin/overview)
+CREATE TABLE IF NOT EXISTS `quiz_attempts` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `quiz_type` enum('product_mcq','course_topic_quiz') NOT NULL,
+  `subject_slug` varchar(191) NOT NULL,
+  `score_correct` smallint unsigned NOT NULL,
+  `score_total` smallint unsigned NOT NULL,
+  `completed_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `idx_quiz_attempts_user` (`user_id`),
+  KEY `idx_quiz_attempts_type_time` (`quiz_type`, `completed_at`),
+  CONSTRAINT `fk_quiz_attempts_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;
@@ -288,3 +303,10 @@ INSERT INTO `course_topic_quiz_questions` (`topic_id`, `question`, `options`, `c
   (@rasp_topic_id, 'Q33. PCI MPoC is a standard for:', JSON_ARRAY('Online merchant card-data storage', 'Mobile-Payments-on-COTS — using a mobile phone (a commercial off-the-shelf device) to accept card payments', 'Credit-bureau reporting', 'ATM hardware certification'), 1, 32)
 
 ;
+
+-- ---------------------------------------------------------------------------
+-- Optional: sample quiz rows for admin dashboard testing (replace user_id)
+-- ---------------------------------------------------------------------------
+-- INSERT INTO `quiz_attempts` (`user_id`, `quiz_type`, `subject_slug`, `score_correct`, `score_total`) VALUES
+-- (1, 'product_mcq', 'zimperium', 4, 5),
+-- (1, 'course_topic_quiz', 'rasp', 30, 33);

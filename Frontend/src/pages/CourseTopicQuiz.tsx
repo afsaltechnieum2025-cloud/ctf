@@ -3,6 +3,8 @@ import { Link, useParams } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuth } from '@/contexts/AuthContext';
+import { submitQuizAttempt } from '@/api/quizAttempts';
 import { useCourseTopicBySlug } from '@/hooks/useCourseTopicBySlug';
 import { useTopicQuiz } from '@/hooks/useTopicQuiz';
 import { ArrowLeft, CheckCircle2, XCircle } from 'lucide-react';
@@ -10,6 +12,7 @@ import { cn } from '@/lib/utils';
 
 export default function CourseTopicQuiz() {
   const { topicSlug } = useParams<{ topicSlug: string }>();
+  const { token } = useAuth();
   const { topic, loading: topicLoading, error: topicError } = useCourseTopicBySlug(topicSlug);
   const { questions, loading: quizLoading, error: quizError } = useTopicQuiz(topicSlug);
   const total = questions.length;
@@ -86,6 +89,28 @@ export default function CourseTopicQuiz() {
     });
   };
 
+  const finishQuiz = () => {
+    if (!topicSlug || !questions.length) {
+      setPhase('results');
+      return;
+    }
+    let correct = 0;
+    for (let i = 0; i < questions.length; i += 1) {
+      if (answers[i] === questions[i].correctIndex) correct += 1;
+    }
+    setPhase('results');
+    if (token) {
+      submitQuizAttempt(token, {
+        quizType: 'course_topic_quiz',
+        subjectSlug: topicSlug,
+        scoreCorrect: correct,
+        scoreTotal: questions.length,
+      }).catch(() => {
+        /* non-blocking */
+      });
+    }
+  };
+
   if (phase === 'results') {
     return (
       <DashboardLayout title={`${topic.title} — Quiz Results`}>
@@ -107,8 +132,11 @@ export default function CourseTopicQuiz() {
               <CardTitle className="min-w-0 break-words text-2xl font-semibold tracking-tight text-pretty">
                 {topic.title}
               </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                {score.correct} of {total} correct
+              <p className="mt-2 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+                You scored {score.correct} / {total}
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {score.wrong} incorrect · {total > 0 ? Math.round((100 * score.correct) / total) : 0}% correct
               </p>
             </CardHeader>
             <CardContent className="pt-6">
@@ -243,7 +271,7 @@ export default function CourseTopicQuiz() {
                 Next
               </Button>
             ) : (
-              <Button type="button" className="w-full sm:w-auto sm:min-w-[8.5rem]" onClick={() => setPhase('results')}>
+              <Button type="button" className="w-full sm:w-auto sm:min-w-[8.5rem]" onClick={finishQuiz}>
                 View results
               </Button>
             )}

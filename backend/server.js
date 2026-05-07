@@ -43,6 +43,7 @@ const authRoutes       = require('./routes/auth');
 const usersRoutes      = require('./routes/user');
 const statsRoutes      = require('./routes/stats');
 const learningRoutes   = require('./routes/learning');
+const quizAttemptsRoutes = require('./routes/quizAttempts');
 
 // Public routes — no token needed
 app.use('/api/auth', authRoutes);
@@ -52,6 +53,7 @@ app.use('/api/users',         authMiddleware, usersRoutes);
 app.use('/api/stats',         authMiddleware, statsRoutes);
 app.use('/api/notifications', authMiddleware, notificationsRoutes);
 app.use('/api/learning',      authMiddleware, learningRoutes);
+app.use('/api/quiz-attempts', authMiddleware, quizAttemptsRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {
@@ -61,6 +63,7 @@ app.get('/', (req, res) => {
       users: '/api/users',
       stats: '/api/stats/dashboard',
       learning: '/api/learning/course-topics',
+      quizAttempts: '/api/quiz-attempts',
     }
   });
 });

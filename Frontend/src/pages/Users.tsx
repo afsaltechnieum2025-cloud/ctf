@@ -48,6 +48,7 @@ import {
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { UserProfileDialog } from '@/components/UserProfileDialog';
+import { UserQuizReportDialog } from '@/components/UserQuizReportDialog';
 import { triggerNotifyRefresh } from '@/utils/notifyRefresh';
 import { API } from '@/utils/api';
 import { cn } from '@/lib/utils';
@@ -175,6 +176,10 @@ export default function Users() {
   // Profile dialog
   const [selectedUserForProfile, setSelectedUserForProfile] = useState<UserWithRole | null>(null);
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
+
+  // Quiz report dialog (card click)
+  const [quizReportUser, setQuizReportUser] = useState<UserWithRole | null>(null);
+  const [isQuizReportOpen, setIsQuizReportOpen] = useState(false);
 
   if (role !== 'admin' && role !== 'manager') return <Navigate to="/dashboard" replace />;
 
@@ -367,10 +372,14 @@ export default function Users() {
     userAssignments.some(a => a.project_id === projectId);
 
   // ── Profile ──────────────────────────────────────────────────────────────
-  const openUserProfile = (user: UserWithRole, e: React.MouseEvent) => {
-    e.stopPropagation();
+  const openUserProfile = (user: UserWithRole) => {
     setSelectedUserForProfile(user);
     setIsProfileDialogOpen(true);
+  };
+
+  const openQuizReportDialog = (user: UserWithRole) => {
+    setQuizReportUser(user);
+    setIsQuizReportOpen(true);
   };
 
   const filteredUsers = users.filter(u =>
@@ -661,7 +670,7 @@ export default function Users() {
               key={member.id}
               glow
               className="animate-fade-in cursor-pointer transition-all hover:scale-[1.02] hover:shadow-lg group"
-              onClick={(e) => member.role !== 'client' && openUserProfile(member, { stopPropagation: () => {} } as React.MouseEvent)}
+              onClick={() => openQuizReportDialog(member)}
               style={{ animationDelay: `${index * 50}ms` }}
             >
               <CardContent className="p-4">
@@ -688,6 +697,16 @@ export default function Users() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                      {member.role !== 'client' ? (
+                        <DropdownMenuItem
+                          onClick={() => {
+                            openUserProfile(member);
+                          }}
+                        >
+                          <UserCheck className="h-4 w-4 mr-2" />
+                          View profile
+                        </DropdownMenuItem>
+                      ) : null}
                       <DropdownMenuItem onClick={() => handleChangeRole(member)}>
                         <UserCog className="h-4 w-4 mr-2" />Change Role
                       </DropdownMenuItem>
@@ -843,6 +862,16 @@ export default function Users() {
           userFullName={selectedUserForProfile?.full_name || undefined}
           open={isProfileDialogOpen}
           onOpenChange={setIsProfileDialogOpen}
+        />
+
+        <UserQuizReportDialog
+          open={isQuizReportOpen}
+          onOpenChange={(open) => {
+            setIsQuizReportOpen(open);
+            if (!open) setQuizReportUser(null);
+          }}
+          user={quizReportUser}
+          token={token}
         />
 
       </div>

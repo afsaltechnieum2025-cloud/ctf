@@ -9,9 +9,19 @@ const db = require('../db');
  */
 router.get('/dashboard', async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT COUNT(*) AS c FROM users');
-    const userCount = Number(rows[0]?.c ?? 0);
-    res.json({ userCount });
+    const [userRows, productRows, courseRows] = await Promise.all([
+      db.query('SELECT COUNT(*) AS c FROM users'),
+      db.query('SELECT COUNT(*) AS c FROM products'),
+      db.query('SELECT COUNT(*) AS c FROM course_topics'),
+    ]);
+
+    const readC = (qr) => Number(qr[0]?.[0]?.c ?? 0);
+
+    res.json({
+      userCount: readC(userRows),
+      productCount: readC(productRows),
+      courseTopicCount: readC(courseRows),
+    });
   } catch (err) {
     console.error('stats/dashboard:', err);
     res.status(500).json({ error: err.message });

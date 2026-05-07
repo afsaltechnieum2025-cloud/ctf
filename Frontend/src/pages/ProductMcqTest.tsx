@@ -3,6 +3,8 @@ import { Link, useParams } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuth } from '@/contexts/AuthContext';
+import { submitQuizAttempt } from '@/api/quizAttempts';
 import { useCourseLinkedProductSlugs } from '@/hooks/useCourseLinkedProductSlugs';
 import { isProductLinkedToCourses } from '@/data/courseTopics';
 import { getProductBySlug } from '@/data/productCatalog';
@@ -14,6 +16,7 @@ const TOTAL = MCQ_QUESTION_STEMS.length;
 
 export default function ProductMcqTest() {
   const { slug } = useParams<{ slug: string }>();
+  const { token } = useAuth();
   const { slugs: courseLinkedSlugs, loading: courseLinksLoading } = useCourseLinkedProductSlugs();
   const product = slug ? getProductBySlug(slug) : undefined;
   const questions = slug ? getMcqSetForSlug(slug) : undefined;
@@ -77,7 +80,30 @@ export default function ProductMcqTest() {
     });
   };
 
-  const goDone = () => setPhase('results');
+  const goDone = () => {
+    if (!slug || !questions) {
+      setPhase('results');
+      return;
+    }
+    let correct = 0;
+    for (let i = 0; i < TOTAL; i += 1) {
+      const picked = answers[i];
+      if (picked !== null && picked !== undefined && picked === questions[i].correctIndex) {
+        correct += 1;
+      }
+    }
+    setPhase('results');
+    if (token) {
+      submitQuizAttempt(token, {
+        quizType: 'product_mcq',
+        subjectSlug: slug,
+        scoreCorrect: correct,
+        scoreTotal: TOTAL,
+      }).catch(() => {
+        /* non-blocking */
+      });
+    }
+  };
 
   const retake = () => {
     setStep(0);
@@ -108,8 +134,12 @@ export default function ProductMcqTest() {
               <CardTitle className="min-w-0 break-words text-2xl font-semibold tracking-tight text-pretty">
                 {product.name}
               </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                {score.correct} of {TOTAL} correct · {score.wrong} incorrect or unanswered
+              <p className="mt-2 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+                You scored {score.correct} / {TOTAL}
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {score.wrong} incorrect or unanswered ·{' '}
+                {TOTAL > 0 ? Math.round((100 * score.correct) / TOTAL) : 0}% correct
               </p>
             </CardHeader>
             <CardContent className="pt-6">
