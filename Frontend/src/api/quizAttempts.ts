@@ -1,4 +1,5 @@
 import { API } from '@/utils/api';
+import { triggerNotifyRefresh } from '@/utils/notifyRefresh';
 
 export type QuizType = 'product_mcq' | 'course_topic_quiz';
 
@@ -29,7 +30,9 @@ export async function submitQuizAttempt(token: string, body: SubmitQuizAttemptBo
     }
     throw new Error(detail);
   }
-  return res.json() as Promise<{ ok: boolean; id?: number }>;
+  const payload = (await res.json()) as { ok: boolean; id?: number };
+  triggerNotifyRefresh();
+  return payload;
 }
 
 export type AdminQuizUserRow = {

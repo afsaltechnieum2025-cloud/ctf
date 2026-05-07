@@ -1,6 +1,6 @@
 const { notifyFromRequest } = require('../services/notificationDispatch');
 
-const ROUTE_PREFIXES = ['/api/users'];
+const ROUTE_PREFIXES = ['/api/users', '/api/quiz-attempts'];
 
 function notifyMiddleware(req, res, next) {
   if (!['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)) return next();

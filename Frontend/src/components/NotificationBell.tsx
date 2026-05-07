@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Bell, CheckCheck, Search, FolderOpen, User } from 'lucide-react';
+import { Bell, CheckCheck, Search, FolderOpen, User, GraduationCap } from 'lucide-react';
 import { NOTIFY_EVENT } from '@/utils/notifyRefresh';
 import { API } from '@/utils/api';
 
@@ -51,6 +51,13 @@ const TYPE_CONFIG: Record<string, {
     border: 'hsl(var(--primary) / 0.22)',
     iconColor: 'var(--color-brand)',
     dot: 'var(--color-brand)',
+  },
+  quiz: {
+    IconComponent: GraduationCap,
+    bg: 'hsl(142 76% 36% / 0.12)',
+    border: 'hsl(142 76% 36% / 0.22)',
+    iconColor: 'hsl(142 76% 36%)',
+    dot: 'hsl(142 76% 36%)',
   },
   general: {
     IconComponent: Bell,
