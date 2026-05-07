@@ -290,7 +290,7 @@ export function UserProfileDialog({
 
         children.push(
             new Paragraph({ spacing: { before: 400 }, children: [new TextRun('')] }),
-            new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: 'CONFIDENTIAL – Technieum Upskill portal', bold: true, color: 'f97316' })] }),
+            new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: 'CONFIDENTIAL – Technieum UpSkill portal', bold: true, color: 'f97316' })] }),
             new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: `Generated on: ${currentDate}`, size: 18, color: '6b7280' })] }),
         );
 
@@ -366,8 +366,8 @@ export function UserProfileDialog({
                             {/* Logo row — white only, sits on orange gradient */}
                             <div className="mb-1 flex flex-col gap-0.5">
                                 <span className="text-xs font-bold tracking-tight text-white">Technieum</span>
-                                <span className="text-[10px] font-semibold uppercase tracking-wide text-white/85">
-                                    Upskill portal
+                                <span className="text-[10px] font-semibold tracking-wide text-white/85">
+                                    UpSkill portal
                                 </span>
                             </div>
 

@@ -38,12 +38,14 @@ export default function CourseTopicQuiz() {
   if (invalid) {
     return (
       <DashboardLayout title="Topic Quiz">
-        <p className="text-muted-foreground">
-          This topic does not have a quiz yet, or the link is invalid.
-        </p>
-        <Button asChild variant="outline" className="mt-4">
-          <Link to="/courses">Back to Courses</Link>
-        </Button>
+        <div className="mx-auto w-full max-w-lg min-w-0 space-y-4">
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            This topic does not have a quiz yet, or the link is invalid.
+          </p>
+          <Button asChild variant="outline" className="w-full sm:w-auto">
+            <Link to="/courses">Back to Courses</Link>
+          </Button>
+        </div>
       </DashboardLayout>
     );
   }
@@ -64,7 +66,7 @@ export default function CourseTopicQuiz() {
   if (phase === 'results') {
     return (
       <DashboardLayout title={`${topic.title} — Quiz Results`}>
-        <div className="mb-6 flex flex-wrap items-center gap-3">
+        <div className="mx-auto mb-6 w-full max-w-3xl min-w-0">
           <Button asChild variant="ghost" size="sm" className="-ml-2 gap-1 text-muted-foreground">
             <Link to={`/courses/topics/${topic.slug}`}>
               <ArrowLeft className="h-4 w-4" aria-hidden />
@@ -73,27 +75,29 @@ export default function CourseTopicQuiz() {
           </Button>
         </div>
 
-        <div className="max-w-3xl space-y-6">
-          <Card className="border-border/60 bg-card/40 shadow-md">
-            <CardHeader className="border-b border-border/60 pb-4">
+        <div className="mx-auto w-full max-w-3xl min-w-0 space-y-6">
+          <Card className="min-w-0 border-border/60 bg-card/40 shadow-md">
+            <CardHeader className="min-w-0 space-y-1 border-b border-border/60 pb-4">
               <CardDescription className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Topic quiz results
               </CardDescription>
-              <CardTitle className="text-2xl font-semibold tracking-tight">{topic.title}</CardTitle>
+              <CardTitle className="min-w-0 break-words text-2xl font-semibold tracking-tight text-pretty">
+                {topic.title}
+              </CardTitle>
               <p className="text-sm text-muted-foreground">
                 {score.correct} of {total} correct
               </p>
             </CardHeader>
             <CardContent className="pt-6">
-              <div className="grid grid-cols-2 gap-4 sm:gap-6">
-                <div className="rounded-lg border border-border bg-card px-4 py-5 text-center">
+              <div className="grid min-w-0 grid-cols-2 gap-4 sm:gap-6">
+                <div className="min-w-0 rounded-lg border border-border bg-card px-3 py-5 text-center sm:px-4">
                   <div className="flex items-center justify-center gap-1.5 text-xs font-medium text-muted-foreground">
                     <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-500" aria-hidden />
                     Correct
                   </div>
                   <p className="mt-2 text-3xl font-semibold tabular-nums text-foreground">{score.correct}</p>
                 </div>
-                <div className="rounded-lg border border-border bg-card px-4 py-5 text-center">
+                <div className="min-w-0 rounded-lg border border-border bg-card px-3 py-5 text-center sm:px-4">
                   <div className="flex items-center justify-center gap-1.5 text-xs font-medium text-muted-foreground">
                     <XCircle className="h-4 w-4 text-destructive" aria-hidden />
                     Incorrect
@@ -102,10 +106,11 @@ export default function CourseTopicQuiz() {
                 </div>
               </div>
             </CardContent>
-            <CardFooter className="flex flex-wrap gap-3 border-t border-border/60 bg-muted/20 pt-6">
+            <CardFooter className="flex flex-col gap-3 border-t border-border/60 bg-muted/20 pt-6 sm:flex-row sm:flex-wrap sm:justify-end">
               <Button
                 type="button"
                 variant="outline"
+                className="w-full sm:w-auto sm:min-w-[10rem]"
                 onClick={() => {
                   setStep(0);
                   setAnswers(Array(total).fill(-1));
@@ -114,7 +119,7 @@ export default function CourseTopicQuiz() {
               >
                 Retake quiz
               </Button>
-              <Button asChild>
+              <Button className="w-full sm:w-auto" asChild>
                 <Link to={`/courses/topics/${topic.slug}`}>Return to topic</Link>
               </Button>
             </CardFooter>
@@ -126,7 +131,7 @@ export default function CourseTopicQuiz() {
 
   return (
     <DashboardLayout title={`${topic.title} — Topic Quiz`} description={`Question ${step + 1} of ${total}`}>
-      <div className="mb-6 flex flex-wrap items-center gap-3">
+      <div className="mx-auto mb-6 w-full max-w-3xl min-w-0">
         <Button asChild variant="ghost" size="sm" className="-ml-2 gap-1 text-muted-foreground">
           <Link to={`/courses/topics/${topic.slug}`}>
             <ArrowLeft className="h-4 w-4" aria-hidden />
@@ -135,9 +140,9 @@ export default function CourseTopicQuiz() {
         </Button>
       </div>
 
-      <div className="max-w-3xl space-y-6">
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-sm">
+      <div className="mx-auto w-full max-w-3xl min-w-0 space-y-6">
+        <div className="min-w-0 space-y-2">
+          <div className="flex min-w-0 items-center justify-between gap-3 text-sm">
             <span className="font-medium text-foreground">Progress</span>
             <span className="tabular-nums text-muted-foreground">
               {step + 1} / {total}
@@ -158,18 +163,18 @@ export default function CourseTopicQuiz() {
           </div>
         </div>
 
-        <Card className="border-border/60 bg-card/40 shadow-md">
-          <CardHeader className="border-b border-border/60 pb-4">
+        <Card className="min-w-0 border-border/60 bg-card/40 shadow-md">
+          <CardHeader className="min-w-0 space-y-1 border-b border-border/60 pb-4">
             <CardDescription className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               {topic.title}
             </CardDescription>
-            <CardTitle className="text-left text-lg font-semibold leading-snug sm:text-xl">
+            <CardTitle className="min-w-0 break-words text-left text-lg font-semibold leading-snug text-pretty sm:text-xl">
               {current.question}
             </CardTitle>
           </CardHeader>
 
-          <CardContent className="pt-6">
-            <fieldset className="space-y-3">
+          <CardContent className="min-w-0 pt-6">
+            <fieldset className="min-w-0 space-y-3">
               <legend className="sr-only">{current.question}</legend>
               {current.options.map((option, idx) => {
                 const id = `topic-quiz-${topic.slug}-${step}-${idx}`;
@@ -179,7 +184,7 @@ export default function CourseTopicQuiz() {
                     key={id}
                     htmlFor={id}
                     className={cn(
-                      'flex cursor-pointer items-start gap-3 rounded-lg border px-4 py-3.5 text-sm leading-snug transition-colors',
+                      'flex w-full min-w-0 cursor-pointer items-start gap-3 rounded-lg border px-4 py-3.5 text-left text-sm leading-snug transition-colors',
                       checked
                         ? 'border-primary bg-primary/5 ring-1 ring-primary/20'
                         : 'border-border bg-background hover:bg-muted/40',
@@ -189,32 +194,33 @@ export default function CourseTopicQuiz() {
                       id={id}
                       type="radio"
                       name={`topic-quiz-${topic.slug}-${step}`}
-                      className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
+                      className="mt-1 h-4 w-4 shrink-0 accent-primary"
                       checked={checked}
                       onChange={() => setChoice(idx)}
                     />
-                    <span className="text-foreground">{option}</span>
+                    <span className="min-w-0 flex-1 text-foreground">{option}</span>
                   </label>
                 );
               })}
             </fieldset>
           </CardContent>
 
-          <CardFooter className="flex flex-wrap items-center justify-between gap-3 border-t border-border/60 bg-muted/20">
+          <CardFooter className="flex flex-col gap-3 border-t border-border/60 bg-muted/20 pt-6 sm:flex-row sm:items-center sm:justify-between">
             <Button
               type="button"
               variant="outline"
+              className="w-full sm:w-auto sm:min-w-[8.5rem]"
               disabled={step === 0}
               onClick={() => setStep((s) => s - 1)}
             >
               Previous
             </Button>
             {!isLast ? (
-              <Button type="button" onClick={() => setStep((s) => Math.min(total - 1, s + 1))}>
+              <Button type="button" className="w-full sm:w-auto sm:min-w-[8.5rem]" onClick={() => setStep((s) => Math.min(total - 1, s + 1))}>
                 Next
               </Button>
             ) : (
-              <Button type="button" onClick={() => setPhase('results')}>
+              <Button type="button" className="w-full sm:w-auto sm:min-w-[8.5rem]" onClick={() => setPhase('results')}>
                 View results
               </Button>
             )}

@@ -26,7 +26,7 @@ export const COURSE_TOPICS: CourseTopic[] = [
     tagline: 'From zero to conversational: mobile RASP explained properly',
     summary:
       'Foundation training for mobile RASP: why mobile is different, how attacks work, the five defense layers, compliance drivers, and how to evaluate vendors confidently.',
-    relatedProductSlugs: ['protectt-ai'],
+    relatedProductSlugs: ['protectt-ai', 'guardsquare', 'zimperium', 'onespan'],
     sections: [
       {
         heading: 'Why mobile app security is a special problem',

@@ -133,7 +133,7 @@ export default function AppSidebar() {
               />
               <div className="flex flex-col leading-tight">
                 <span className="font-bold text-sm text-gradient">Technieum</span>
-                <span className="font-semibold text-xs text-muted-foreground">Upskill portal</span>
+                <span className="font-semibold text-xs text-muted-foreground">UpSkill portal</span>
               </div>
             </Link>
           )}

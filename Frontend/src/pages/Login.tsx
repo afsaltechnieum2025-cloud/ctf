@@ -278,7 +278,7 @@ export default function Login() {
                     className="h-14 w-auto max-w-[min(220px,85vw)] object-contain"
                   />
                 </div>
-                <h1 className="text-xl font-semibold text-gradient">Technieum Upskill portal</h1>
+                <h1 className="text-xl font-semibold text-gradient">Technieum UpSkill portal</h1>
               </div>
 
               {/* Card */}

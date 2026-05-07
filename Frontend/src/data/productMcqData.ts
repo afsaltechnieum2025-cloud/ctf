@@ -19,6 +19,7 @@ export type McqQuestion = {
 export type ProductMcqSet = readonly McqQuestion[];
 
 export const MCQS_BY_SLUG: Record<string, ProductMcqSet> = {
+  /** Section E — Course 3 Certification (TECH-EDU-RASP-301), Q34–Q38 */
   'protectt-ai': [
     {
       question: 'Protectt.ai is headquartered in:',
@@ -68,6 +69,140 @@ export const MCQS_BY_SLUG: Record<string, ProductMcqSet> = {
         'TechBridge Distribution MEA',
         'Spire Solutions',
         'StarLink',
+      ],
+    },
+  ],
+
+  /** Section F — Course 3 Certification (TECH-EDU-RASP-301), Q39–Q43 */
+  guardsquare: [
+    {
+      question: 'Guardsquare’s product for protecting Android applications is:',
+      correctIndex: 1,
+      options: ['iXGuard', 'DexGuard', 'ZimGuard', 'AppShield'],
+    },
+    {
+      question: 'Guardsquare’s product for protecting iOS applications is:',
+      correctIndex: 1,
+      options: ['DexGuard', 'iXGuard', 'iOSProtect', 'AppleGuard'],
+    },
+    {
+      question: 'Guardsquare’s open-source heritage is the:',
+      correctIndex: 0,
+      options: [
+        'ProGuard project (Android shrinker / obfuscator)',
+        'OpenSSL project',
+        'Apache Software Foundation',
+        'Linux Kernel project',
+      ],
+    },
+    {
+      question: 'Guardsquare’s real-time post-publication threat-monitoring console is called:',
+      correctIndex: 0,
+      options: ['ThreatCast', 'zConsole', 'AppWatch', 'ProTracker'],
+    },
+    {
+      question: 'AppSweep, by Guardsquare, is best described as:',
+      correctIndex: 1,
+      options: [
+        'A premium paid product for runtime defence',
+        'A free static-analysis (MAST) tool that identifies security issues in mobile apps',
+        'A device-cleaning utility for old phones',
+        'An offline backup tool for mobile data',
+      ],
+    },
+  ],
+
+  /** Section G — Course 3 Certification (TECH-EDU-RASP-301), Q44–Q48 */
+  zimperium: [
+    {
+      question: 'MAPS, in the Zimperium product naming, stands for:',
+      correctIndex: 1,
+      options: [
+        'Mobile App Penetration Suite',
+        'Mobile Application Protection Suite',
+        'Multi-Access Protection Service',
+        'Managed App Performance Suite',
+      ],
+    },
+    {
+      question: 'The Zimperium module that provides on-device runtime protection (RASP) is:',
+      correctIndex: 2,
+      options: ['zScan', 'zShield', 'zDefend', 'zKeyBox'],
+    },
+    {
+      question: 'zShield, in the Zimperium suite, is responsible for:',
+      correctIndex: 1,
+      options: [
+        'Threat-intelligence reporting',
+        'Application hardening — obfuscation, anti-tampering and encryption — at compile-time or post-compile',
+        'Customer authentication only',
+        'Customer billing and licensing',
+      ],
+    },
+    {
+      question: 'zKeyBox is dedicated to:',
+      correctIndex: 1,
+      options: [
+        'Storing user passwords',
+        'White-box cryptography to protect cryptographic keys from extraction or manipulation',
+        'Customer chat support',
+        'Push notifications to end-users',
+      ],
+    },
+    {
+      question:
+        'Zimperium has been recognised as a Leader in QKS Group’s SPARK Matrix for In-App Protection:',
+      correctIndex: 1,
+      options: [
+        'Once, in 2025 only',
+        'For three years running — 2023, 2024 and 2025',
+        'Never',
+        'Only in the Asia-Pacific edition',
+      ],
+    },
+  ],
+
+  /** Section H — Course 3 Certification (TECH-EDU-RASP-301), Q49–Q53 */
+  onespan: [
+    {
+      question: 'OneSpan was previously known as:',
+      correctIndex: 1,
+      options: [
+        'Symantec Corporation',
+        'Vasco Data Security International',
+        'RSA Security',
+        'Verizon Security',
+      ],
+    },
+    {
+      question:
+        'OneSpan’s transaction-signing technology, using a graphical colour cryptogram (visual cryptogram), is called:',
+      correctIndex: 1,
+      options: ['DigiSign', 'Cronto', 'ColorAuth', 'QR-Sign'],
+    },
+    {
+      question: 'OneSpan’s international (EMEA) headquarters has been located in which UAE district since 2012?',
+      correctIndex: 1,
+      options: [
+        'Dubai International Financial Centre (DIFC)',
+        'Dubai Silicon Oasis',
+        'Abu Dhabi Global Market (ADGM)',
+        'Sharjah Free Zone',
+      ],
+    },
+    {
+      question: 'OneSpan’s March-2026 acquisition that significantly enhances its mobile RASP offering is:',
+      correctIndex: 1,
+      options: ['Zimperium', 'Build38', 'Guardsquare', 'Protectt.ai'],
+    },
+    {
+      question: 'OneSpan sits on the board of which authentication standards body?',
+      correctIndex: 1,
+      options: [
+        'PCI Security Standards Council',
+        'FIDO Alliance',
+        'ISO 27001 Committee',
+        'SWIFT',
       ],
     },
   ],

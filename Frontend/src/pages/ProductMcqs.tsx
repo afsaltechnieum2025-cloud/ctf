@@ -16,13 +16,8 @@ export default function ProductMcqs() {
 
   return (
     <DashboardLayout title="Products Quiz">
-      <p className="mb-6 max-w-2xl text-sm text-muted-foreground">
-        Five multiple-choice questions per vendor, aligned with the same story as the vendor course pages.
-        Only vendors linked from your course topics are listed here.
-      </p>
-
       {quizProducts.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm leading-relaxed text-muted-foreground">
           No vendors are linked from Courses yet. Add products to a topic under{' '}
           <Link to="/courses" className="font-medium text-primary underline-offset-4 hover:underline">
             Courses
@@ -39,7 +34,7 @@ export default function ProductMcqs() {
               className="block rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
               <Card className="group flex h-full flex-col overflow-hidden border-border/60 bg-card/40 transition-all hover:border-primary/35 hover:bg-card/60 hover:shadow-md">
-                <div className="relative flex aspect-[16/10] min-h-[120px] w-full shrink-0 items-center justify-center border-b border-border/50 bg-gradient-to-b from-secondary/40 to-muted/20">
+                <div className="relative flex aspect-[16/10] min-h-[140px] w-full shrink-0 items-center justify-center border-b border-border/50 bg-gradient-to-b from-primary/15 to-muted/20 sm:min-h-[160px]">
                   {item.image ? (
                     <img
                       src={item.image}
@@ -48,15 +43,17 @@ export default function ProductMcqs() {
                     />
                   ) : (
                     <div className="flex flex-col items-center justify-center gap-2 px-4 py-4 text-center text-muted-foreground">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-dashed border-border/80 bg-background/40">
-                        <ImageIcon className="h-4 w-4" aria-hidden />
+                      <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/25 bg-primary/10 text-primary">
+                        <ImageIcon className="h-8 w-8" aria-hidden />
                       </div>
                     </div>
                   )}
                 </div>
-                <CardHeader className="space-y-1 pb-3 pt-3">
-                  <CardTitle className="text-base font-semibold">{item.name}</CardTitle>
-                  <CardDescription className="text-xs leading-relaxed line-clamp-3">
+                <CardHeader className="space-y-2 pb-4 pt-4">
+                  <CardTitle className="text-base font-semibold tracking-tight text-foreground sm:text-lg">
+                    {item.name}
+                  </CardTitle>
+                  <CardDescription className="text-sm leading-relaxed text-muted-foreground line-clamp-3">
                     {item.description}
                   </CardDescription>
                 </CardHeader>

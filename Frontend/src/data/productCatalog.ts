@@ -18,6 +18,27 @@ export const PRODUCTS: CatalogProduct[] = [
       'Protectt.ai focuses on protecting live applications—especially on mobile—where attackers tamper with binaries, hook APIs, or abuse runtime behavior. Teams use it to harden releases, detect cloning and fraud patterns, and gather telemetry when apps run in hostile environments. It complements traditional scanning by addressing what happens after the app ships to real users.',
   },
   {
+    slug: 'guardsquare',
+    name: 'Guardsquare',
+    url: 'https://www.guardsquare.com/',
+    description:
+      'Guardsquare is best known for mobile app protection and hardening: DexGuard for Android, iXGuard for iOS, plus ThreatCast for post-release threat visibility and AppSweep for developer-side static checks. It extends the open-source ProGuard lineage into enterprise-grade obfuscation, anti-tampering, and runtime-aware defenses when high-value apps face reverse engineering and abuse in the wild.',
+  },
+  {
+    slug: 'zimperium',
+    name: 'Zimperium',
+    url: 'https://www.zimperium.com/',
+    description:
+      'Zimperium delivers mobile-first application protection under its MAPS (Mobile Application Protection Suite) story: on-device RASP (for example zDefend), hardening such as zShield, and cryptographic key protection with zKeyBox. It targets banks, fintech, and large consumer apps that need continuous runtime integrity, hooking detection, and analyst-recognized depth—not only pre-release scans.',
+  },
+  {
+    slug: 'onespan',
+    name: 'OneSpan',
+    url: 'https://www.onespan.com/',
+    description:
+      'OneSpan (formerly Vasco Data Security) combines strong customer authentication, fraud signals, and application shielding—including mobile hardening lines such as Build38—so regulated industries can protect high-risk transactions and the app runtime together. Buyers often evaluate OneSpan when digital banking, identity, and RASP-style controls must sit on one vendor roadmap with compliance-friendly deployment options.',
+  },
+  {
     slug: 'appknox',
     name: 'Appknox',
     url: 'https://www.appknox.com/',

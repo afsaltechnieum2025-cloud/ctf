@@ -2,12 +2,17 @@
  * Sales-enablement copy: plain language, outcomes, and talk tracks for customer-facing teams.
  * Keyed by `CatalogProduct.slug`.
  */
+import type { VendorDeepDive } from './vendorDeepDives';
+import { VENDOR_DEEP_DIVES } from './vendorDeepDives';
+
 export type ProductSalesBrief = {
   slug: string;
   /** One line you can repeat in an elevator or email subject. */
   tagline: string;
   /** Short paragraph—no acronym soup. */
   inPlainEnglish: string;
+  /** Course 2 vendor deep-dive — renders extended sections on /courses/:slug when present. */
+  deepDive?: VendorDeepDive;
   /** Why a buyer cares (business outcomes). */
   whyItMatters: string[];
   /** Who typically signs or champions the deal. */
@@ -23,39 +28,157 @@ export type ProductSalesBrief = {
 export const PRODUCT_SALES_BRIEFS: Record<string, ProductSalesBrief> = {
   'protectt-ai': {
     slug: 'protectt-ai',
-    tagline: 'Keeps your live mobile and app experience trustworthy after release—not just before.',
+    tagline: 'Banking-only mobile stack: RASP, obfuscation, SIM/device binding, and AI fraud — one SDK, one dashboard.',
     inPlainEnglish:
-      'Protectt.ai watches how real apps behave in the real world: tampering, fake apps, fraud hooks, and abuse. Think of it as “runtime guardrails” once the customer has already downloaded your app. It pairs with design-time testing; it does not replace secure coding, but it answers what happens when bad actors attack the app customers actually run.',
+      'Position Protectt.ai when the buyer needs Indian regulatory mapping, aggressive TCO, and the fastest path to go-live. Four modules share one SDK and one console, with webhooks into SIEM and fraud systems — purpose-built for BFSI rather than generic enterprise mobile.',
+    deepDive: VENDOR_DEEP_DIVES['protectt-ai'],
     whyItMatters: [
-      'Reduces fraud losses and brand damage from cloned or modified apps.',
-      'Gives security and product teams evidence when users behave abnormally.',
-      'Shortens “we got a report from the field” investigations with telemetry you otherwise would not have.',
+      'One contract covers AppProtectt, CodeProtectt, AppBind, and Fraud Risk Management — fewer vendors to stitch.',
+      'AppBind answers SIM-swap and device-trust questions tied to CBUAE Notice 2025/3057-style conversations.',
+      'Pre-mapped RBI / NPCI / SEBI evidence shortens compliance workshops versus generic RASP PDFs.',
     ],
     whoBuysThis: [
-      'Mobile product owners and digital banking / fintech leaders.',
-      'App security or fraud teams under pressure from regulators or auditors.',
-      'Enterprises with high-value consumer apps (payments, loyalty, identity).',
+      'Indian-influenced banks and exchange houses in UAE; tier-2 GCC banks on tight CBUAE timelines.',
+      'CISO and fraud leaders who want AI behavioural models inside the same mobile contract.',
+      'Procurement-led buyers comparing TCO across the four-vendor shortlist.',
     ],
     talkTracks: [
-      '“This is about protecting the app after it ships—fakes, tampering, and fraud in the wild, not just finding bugs in a lab.”',
-      '“If your risk is ‘what happens on millions of devices we don’t control,’ that’s the conversation Protectt is built for.”',
+      '“One SDK: AppProtectt is the runtime guard, CodeProtectt hides the code, AppBind locks device plus SIM, Fraud Risk Management watches behaviour — all in one dashboard.”',
+      '“If the RFP scores Indian regulatory alignment and speed to production, Protectt leads the story.”',
     ],
     objections: [
       {
-        question: 'Isn’t this the same as scanning the app before release?',
+        question: 'They have not heard the name outside India.',
         answer:
-          'Pre-release scanning finds code issues. Protectt focuses on runtime integrity and abuse when the binary is on a user’s phone—different problem, complementary tools.',
+          'Acknowledge, then pivot to reference depth (RBL, Yes Bank, Bajaj Finserv), TechBridge MEA for local presence, and Technieum managed wrap for global support expectations.',
       },
       {
-        question: 'Will developers push back?',
+        question: 'Analyst scores matter more than price.',
         answer:
-          'Position it as protecting revenue and users, not blaming engineering. Most teams welcome visibility when rollouts are tied to clear playbooks, not finger-pointing.',
+          'Be honest: Protectt is lighter on Gartner/Forrester/QKS than Zimperium or Guardsquare. Pair wins with compliance mapping, TCO, and time-to-live — or recommend a hybrid if the RFP is pure analyst-weighted.',
       },
     ],
     differentiators: [
-      'Runtime and post-release lens vs design-time-only testing.',
-      'Strong story for mobile-first and high-fraud industries.',
-      'Speaks the language of trust, telemetry, and incident response—not only CVE counts.',
+      'Broadest single-SDK control count in the course comparison.',
+      'Native SIM/device binding without bolt-on OTP dependency.',
+      'Fastest typical go-live window in the four-vendor set.',
+    ],
+  },
+
+  guardsquare: {
+    slug: 'guardsquare',
+    tagline: 'Compile-time hardening from the ProGuard lineage — polymorphic obfuscation, RASP in the binary, ThreatCast in production.',
+    inPlainEnglish:
+      'Lead Guardsquare when engineering owns the decision: bytecode is transformed in CI/CD, every release is structurally unique, and ThreatCast streams evidence to Splunk-class SIEMs. AppSweep is the free MAST wedge; App Attestation proves API callers are the real app.',
+    deepDive: VENDOR_DEEP_DIVES.guardsquare,
+    whyItMatters: [
+      'Polymorphic output breaks diff-and-replay research between releases.',
+      'RASP checks are obfuscated themselves, so attackers cannot trivially hook them away.',
+      'Unity/Flutter/React Native coverage wins gaming and exotic fintech stacks.',
+    ],
+    whoBuysThis: [
+      'CTO / VP Engineering-led programmes that prize CI ergonomics.',
+      'Banks and payments vendors recovering from cloning or repackaging incidents.',
+      'Gaming studios and SDK vendors protecting high-value IP in the binary.',
+    ],
+    talkTracks: [
+      '“DexGuard and iXGuard rewrite the app at build time; ThreatCast tells you what attackers tried in the wild; App Attestation keeps clones off your APIs.”',
+      '“When the conversation is IP protection and pipeline elegance, Guardsquare is the primary fit.”',
+    ],
+    objections: [
+      {
+        question: 'They want bundled fraud or transaction signing.',
+        answer:
+          'Guardsquare is deliberately narrower: world-class hardening and telemetry, not a full digital-trust suite. Pair with OneSpan or Zimperium MTD when those gaps are mandatory.',
+      },
+      {
+        question: 'Premium price versus Indian challengers.',
+        answer:
+          'Anchor on engineering time saved, polymorphic uniqueness, and breach cost — then compare fully loaded scope, not list price per module.',
+      },
+    ],
+    differentiators: [
+      'Founder invented the obfuscation stack inside Android itself.',
+      'Dedicated App Attestation product for server-side trust.',
+      'Free AppSweep lowers friction with mobile engineering teams.',
+    ],
+  },
+
+  zimperium: {
+    slug: 'zimperium',
+    tagline: 'MAPS end-to-end mobile app protection — three-time SPARK Leader, FedRAMP, OTA rules, PCI MPoC bundle.',
+    inPlainEnglish:
+      'Zimperium wins analyst- and intel-led RFPs: zScan through zKeyBox roll into zConsole, z9 ML powers zDefend on-device, and MTD can correlate device-wide telemetry. OTA detection updates and the pre-packaged PCI MPoC story separate it operationally from compile-only vendors.',
+    deepDive: VENDOR_DEEP_DIVES.zimperium,
+    whyItMatters: [
+      'OTA rule pushes respond to new malware families without waiting on app-store cycles.',
+      'FedRAMP ATO unlocks federal-style security reviews other mobile vendors cannot match.',
+      'PCI MPoC bundle is the shortest narrative for SoftPOS / tap-on-phone readiness.',
+    ],
+    whoBuysThis: [
+      'Tier-1 banks and PSPs where Gartner/QKS scores and threat intel depth decide.',
+      'Security architects who must prove device plus in-app correlation (MAPS + MTD).',
+      'US healthcare and federal-adjacent teams already standardising on FedRAMP vendors.',
+    ],
+    talkTracks: [
+      '“MAPS covers scan, shield, defend, and keys — zConsole is mission control; MTD is optional but powerful when you must answer what else is wrong on the handset.”',
+      '“When the RFP weights analyst leadership, OTA response, or PCI MPoC, Zimperium is the default primary.”',
+    ],
+    objections: [
+      {
+        question: 'Integration sounds heavy.',
+        answer:
+          'Agree — scope Technieum PS for zShield plus zDefend, budget zConsole training, and show FedRAMP/MPoC artefacts that justify the effort.',
+      },
+      {
+        question: 'They insist on Cronto-style signing in the same SKU.',
+        answer:
+          'Zimperium does not ship transaction signing. Recommend OneSpan for signing-led stacks, or a hybrid architecture with clear hand-offs.',
+      },
+    ],
+    differentiators: [
+      'Three-time QKS SPARK In-App Protection Leader in the course materials.',
+      'Only vendor in the set with FedRAMP mobile positioning as described.',
+      'Native zDefend + MTD correlation for holistic handset visibility.',
+    ],
+  },
+
+  onespan: {
+    slug: 'onespan',
+    tagline: 'Digital-trust platform: Cronto signing, Digipass, FIDO leadership, TID risk — App Shielding now Build38-augmented.',
+    inPlainEnglish:
+      'OneSpan is the longevity and UAE field-presence play: Dubai Silicon Oasis HQ since 2012, board-level FIDO, and Build38 closing the pure-RASP gap. Lead with Cronto and TID when dynamic linking matters; lead with App Shielding + Build38 when the conversation shifts to runtime manipulation.',
+    deepDive: VENDOR_DEEP_DIVES.onespan,
+    whyItMatters: [
+      'Many GCC banks already own Digipass/Cronto — app shielding lands as a contract addendum, not a net-new vendor fight.',
+      'Cronto encodes the real beneficiary in the cryptogram, defeating trojan screen rewrite attacks.',
+      'NASDAQ financial profile plus serial acquisitions (Nok Nok, Build38) answers vendor-risk committees.',
+    ],
+    whoBuysThis: [
+      'Tier-1 banks with vendor-risk frameworks favouring public, long-tenured suppliers.',
+      'Programmes mandating PSD2 dynamic linking with regulator-trusted signing technology.',
+      'Institutions that want FIDO, fraud orchestration, and shielding under one procurement vehicle.',
+    ],
+    talkTracks: [
+      '“TID orchestrates risk; MSS supplies the SDK bricks; App Shielding plus Build38 is the runtime guard; Cronto is how we prove the transaction the user sees is the transaction they sign.”',
+      '“If they already badge into OneSpan, extend the relationship before introducing a fourth mobile vendor.”',
+    ],
+    objections: [
+      {
+        question: 'Technical teams think OneSpan is only tokens.',
+        answer:
+          'Open with App Shielding plus the Build38 roadmap, cite on-device telemetry and cloud-backed controls, then bring Cronto and TID proof points behind their priorities.',
+      },
+      {
+        question: 'They only want best-of-breed RASP, nothing else.',
+        answer:
+          'Acknowledge premium suite economics — if the RFP is RASP-only and analyst-scored, Zimperium or Guardsquare may fit better; use OneSpan when signing, FIDO, and shielding must move together.',
+      },
+    ],
+    differentiators: [
+      'Deepest UAE/GCC field organisation of the four-vendor shortlist.',
+      'FIDO board seat and Nok Nok acquisition for passwordless leadership.',
+      'Build38 acquisition (March 2026) upgrades SDK RASP to cloud-backed, AI-augmented posture.',
     ],
   },
 
