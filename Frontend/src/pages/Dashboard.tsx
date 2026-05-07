@@ -222,10 +222,10 @@ export default function Dashboard() {
                 </p>
               ) : (
                 <div className="overflow-x-auto">
-                  <div className="min-w-0 border-t border-border/40">
+                  <div className="min-w-0 border-t border-[#FF6600]/30">
                     <div className="max-h-[min(360px,50vh)] overflow-auto">
                       <table className="w-full min-w-[520px] border-collapse text-left text-sm">
-                        <thead className="sticky top-0 z-10 border-b border-border bg-muted/90 backdrop-blur-sm">
+                        <thead className="sticky top-0 z-10 border-b-2 border-[#FF6600]/35 bg-muted/90 backdrop-blur-sm">
                           <tr>
                             <th className="whitespace-nowrap px-4 py-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground sm:px-5">
                               When
@@ -245,7 +245,7 @@ export default function Dashboard() {
                           {myAttempts.map((a) => (
                             <tr
                               key={a.id}
-                              className="border-b border-border/50 transition-colors last:border-0 hover:bg-muted/30"
+                              className="border-b border-[#FF6600]/25 transition-colors last:border-b-0 hover:bg-muted/30"
                             >
                               <td className="whitespace-nowrap px-4 py-2.5 text-xs text-muted-foreground sm:px-5">
                                 {formatWhen(a.completedAt)}
