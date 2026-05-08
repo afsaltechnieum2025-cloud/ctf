@@ -8,8 +8,19 @@ import { submitQuizAttempt } from '@/api/quizAttempts';
 import { useCourseTopicBySlug } from '@/hooks/useCourseTopicBySlug';
 import { useTopicQuiz } from '@/hooks/useTopicQuiz';
 import type { TopicQuizQuestion } from '@/data/courseTopicQuizData';
-import { ArrowLeft, CheckCircle2, XCircle } from 'lucide-react';
+import { createCourseQuizSummaryDocxBlob } from '@/utils/buildCourseQuizSummaryDocx';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ArrowLeft, CheckCircle2, Download, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 /** Fisher–Yates shuffle of option order so the keyed answer (e.g. B) is not predictable. */
 function buildShuffledQuestion(q: TopicQuizQuestion): TopicQuizQuestion {
@@ -61,6 +72,57 @@ export default function CourseTopicQuiz() {
     }
     return { correct, wrong: displayQuestions.length - correct };
   }, [answers, displayQuestions]);
+
+  const questionSummaries = useMemo(
+    () =>
+      displayQuestions.map((question, index) => {
+        const selectedIndex = answers[index];
+        return {
+          id: `${topicSlug ?? 'topic'}-summary-${index}`,
+          index,
+          question: question.question,
+          options: question.options,
+          correctIndex: question.correctIndex,
+          selectedIndex,
+          isCorrect: selectedIndex === question.correctIndex,
+        };
+      }),
+    [answers, displayQuestions, topicSlug],
+  );
+
+  const correctSummaries = useMemo(
+    () => questionSummaries.filter((summary) => summary.isCorrect),
+    [questionSummaries],
+  );
+  const incorrectSummaries = useMemo(
+    () => questionSummaries.filter((summary) => !summary.isCorrect),
+    [questionSummaries],
+  );
+
+  const downloadSummaryAsWord = async () => {
+    if (!topic) return;
+    try {
+      const blob = await createCourseQuizSummaryDocxBlob({
+        topicName: topic.title,
+        scoreCorrect: score.correct,
+        scoreTotal: total,
+        correctItems: correctSummaries,
+        incorrectItems: incorrectSummaries,
+      });
+      const objectUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const safeTopicName = topic.title.replace(/[^\w.-]+/g, '_').slice(0, 80) || 'course_topic';
+      link.href = objectUrl;
+      link.download = `course-quiz-summary-${safeTopicName}-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}.docx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(objectUrl);
+      toast.success('Word report downloaded');
+    } catch {
+      toast.error('Failed to generate Word report');
+    }
+  };
 
   if (topicLoading || quizLoading) {
     return (
@@ -197,6 +259,102 @@ export default function CourseTopicQuiz() {
               >
                 Retake quiz
               </Button>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button type="button" variant="outline" className="w-full sm:w-auto">
+                    Summary
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-h-[85vh] w-[95vw] max-w-4xl overflow-hidden p-0">
+                  <DialogHeader className="flex-row items-start justify-between border-b border-border/60 px-6 py-4 pr-14 text-left">
+                    <div className="space-y-1">
+                      <DialogTitle className="text-xl">Question Summary</DialogTitle>
+                      <DialogDescription>
+                        Review each question grouped by whether your answer was correct or incorrect.
+                      </DialogDescription>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="gap-2"
+                      onClick={() => void downloadSummaryAsWord()}
+                    >
+                      <Download className="h-4 w-4" aria-hidden />
+                      Download
+                    </Button>
+                  </DialogHeader>
+
+                  <div className="max-h-[calc(85vh-88px)] overflow-y-auto px-6 py-5">
+                    <Tabs defaultValue="correct" className="min-w-0">
+                      <TabsList className="mb-4 grid w-full grid-cols-2">
+                        <TabsTrigger value="correct">Correct ({correctSummaries.length})</TabsTrigger>
+                        <TabsTrigger value="incorrect">Incorrect ({incorrectSummaries.length})</TabsTrigger>
+                      </TabsList>
+
+                      <TabsContent value="correct" className="space-y-3">
+                        {!correctSummaries.length ? (
+                          <p className="rounded-md border border-dashed border-border px-4 py-3 text-sm text-muted-foreground">
+                            No correct answers yet.
+                          </p>
+                        ) : (
+                          correctSummaries.map((summary) => (
+                            <div key={summary.id} className="rounded-lg border border-emerald-500/30 bg-emerald-500/5 px-4 py-3">
+                              <p className="text-sm font-medium text-foreground">
+                                Q{summary.index + 1}. {summary.question}
+                              </p>
+                              <p className="mt-1 text-sm text-muted-foreground">
+                                Your answer:{' '}
+                                <span className="font-medium text-foreground">
+                                  {summary.selectedIndex >= 0
+                                    ? summary.options[summary.selectedIndex]
+                                    : 'Not answered'}
+                                </span>
+                              </p>
+                              <p className="mt-1 text-sm text-muted-foreground">
+                                Correct answer:{' '}
+                                <span className="font-medium text-foreground">
+                                  {summary.options[summary.correctIndex]}
+                                </span>
+                              </p>
+                            </div>
+                          ))
+                        )}
+                      </TabsContent>
+
+                      <TabsContent value="incorrect" className="space-y-3">
+                        {!incorrectSummaries.length ? (
+                          <p className="rounded-md border border-dashed border-border px-4 py-3 text-sm text-muted-foreground">
+                            Great job. No incorrect answers.
+                          </p>
+                        ) : (
+                          incorrectSummaries.map((summary) => (
+                            <div key={summary.id} className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3">
+                              <p className="text-sm font-medium text-foreground">
+                                Q{summary.index + 1}. {summary.question}
+                              </p>
+                              <p className="mt-1 text-sm text-muted-foreground">
+                                Your answer:{' '}
+                                <span className="font-medium text-foreground">
+                                  {summary.selectedIndex >= 0
+                                    ? summary.options[summary.selectedIndex]
+                                    : 'Not answered'}
+                                </span>
+                              </p>
+                              <p className="mt-1 text-sm text-muted-foreground">
+                                Correct answer:{' '}
+                                <span className="font-medium text-foreground">
+                                  {summary.options[summary.correctIndex]}
+                                </span>
+                              </p>
+                            </div>
+                          ))
+                        )}
+                      </TabsContent>
+                    </Tabs>
+                  </div>
+                </DialogContent>
+              </Dialog>
               <Button className="w-full sm:w-auto" asChild>
                 <Link to={`/courses/topics/${topic.slug}`}>Return to topic</Link>
               </Button>
