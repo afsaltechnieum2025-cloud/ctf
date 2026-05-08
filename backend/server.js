@@ -11,8 +11,7 @@ app.use(cors({
   origin: [
     'http://localhost:8080',
     'http://127.0.0.1:8080',
-    'https://robertred.blog',
-    'https://www.robertred.blog',
+    'https://upskill.robertred.blog',
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
