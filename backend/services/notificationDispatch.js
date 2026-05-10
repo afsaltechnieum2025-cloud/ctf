@@ -72,7 +72,7 @@ async function insertForRecipients({ recipientUserIds, title, message, type }) {
 
 /**
  * Admins + managers always receive portal activity.
- * Testers receive activity for projects they are assigned to, plus anything they did themselves (actor).
+ * Salesteam users receive activity for projects they are assigned to, plus anything they did themselves (actor).
  */
 async function resolveRecipientIds({ projectId, actorUserId }) {
   const set = new Set();
@@ -176,7 +176,7 @@ async function notifyFromRequest({ req, body, matchedPrefix, method }) {
     ]);
     if (ur[0]) targetLabel = ur[0].full_name || ur[0].name || targetLabel;
     title = `Assignment: ${targetLabel} -> ${projName || 'project'}`;
-    message = `${actor} assigned tester ${targetLabel} to project "${projName || 'Unknown project'}".`;
+    message = `${actor} assigned ${targetLabel} to project "${projName || 'Unknown project'}".`;
     const recipientIds = await resolveRecipientIds({ projectId: pid, actorUserId: actorId });
     recipientIds.push(String(targetUserId));
     await insertForRecipients({

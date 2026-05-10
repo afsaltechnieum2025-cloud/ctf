@@ -21,11 +21,18 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
+// Defensive: lowercase role so checks like role === 'salesteam' or
+// staffRoles.includes(role) work regardless of how the DB stores casing.
+const normalizeUser = (u: any): User | null => {
+  if (!u) return null;
+  return { ...u, role: typeof u.role === 'string' ? u.role.toLowerCase() : u.role };
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(() => localStorage.getItem('token'));
   const [user, setUser] = useState<User | null>(() => {
     const saved = localStorage.getItem('user');
-    return saved ? JSON.parse(saved) : null;
+    return saved ? normalizeUser(JSON.parse(saved)) : null;
   });
 
   const login = async (email: string, password: string): Promise<{ error: string | null }> => {
@@ -39,10 +46,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (!res.ok) return { error: data.error || 'Login failed' };
 
+      const normalized = normalizeUser(data.user);
       localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
+      localStorage.setItem('user', JSON.stringify(normalized));
       setToken(data.token);
-      setUser(data.user);
+      setUser(normalized);
       return { error: null };
     } catch (err) {
       return { error: 'Server error. Please try again.' };

@@ -24,7 +24,6 @@ import {
   UserX,
   AtSign,
   Star,
-  Building2,
   Eye,
   EyeOff,
 } from 'lucide-react';
@@ -53,7 +52,7 @@ import { triggerNotifyRefresh } from '@/utils/notifyRefresh';
 import { API } from '@/utils/api';
 import { cn } from '@/lib/utils';
 
-type AppRole = 'admin' | 'manager' | 'tester' | 'pentester' | 'client';
+type AppRole = 'admin' | 'manager' | 'salesteam';
 
 interface UserWithRole {
   id: number;
@@ -78,7 +77,7 @@ interface ProjectAssignment {
 
 // ── Create-user validation (same pattern as Findings / Projects) ─────────────
 
-const ROLE_VALUES: AppRole[] = ['admin', 'manager', 'tester', 'pentester', 'client'];
+const ROLE_VALUES: AppRole[] = ['admin', 'manager', 'salesteam'];
 
 const RE_USERNAME = /^[a-zA-Z0-9._-]{3,64}$/;
 const RE_FULL_NAME = /^[\p{L}\p{M}\s'.-]{2,100}$/u;
@@ -134,8 +133,7 @@ function validateCreateUserForm(user: CreateUserFields): CreateUserFormErrors {
 
 const capitalizeRole = (role: AppRole | null): string => {
   if (!role) return 'No role';
-  if (role === 'tester') return 'Sales Team';
-  if (role === 'pentester') return 'Pentester';
+  if (role === 'salesteam') return 'Salesteam';
   return role.charAt(0).toUpperCase() + role.slice(1).toLowerCase();
 };
 
@@ -147,7 +145,7 @@ export default function Users() {
 
   // Role dialog
   const [selectedUser, setSelectedUser] = useState<UserWithRole | null>(null);
-  const [newRole, setNewRole] = useState<AppRole>('tester');
+  const [newRole, setNewRole] = useState<AppRole>('salesteam');
   const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -157,7 +155,7 @@ export default function Users() {
   const [showPassword, setShowPassword] = useState(false);
   const [formErrors, setFormErrors] = useState<CreateUserFormErrors>({});
   const [newUser, setNewUser] = useState({
-    name: '', email: '', password: '', full_name: '', role: 'tester' as AppRole,
+    name: '', email: '', password: '', full_name: '', role: 'salesteam' as AppRole,
   });
 
   // Delete dialog
@@ -209,7 +207,7 @@ export default function Users() {
 
   // ── Reset create-dialog state on close ───────────────────────────────────
   const resetCreateDialog = () => {
-    setNewUser({ name: '', email: '', password: '', full_name: '', role: 'tester' });
+    setNewUser({ name: '', email: '', password: '', full_name: '', role: 'salesteam' });
     setFormErrors({});
     setShowPassword(false);
   };
@@ -265,7 +263,7 @@ export default function Users() {
   // ── Role dialog ──────────────────────────────────────────────────────────
   const handleChangeRole = (user: UserWithRole) => {
     setSelectedUser(user);
-    setNewRole(user.role || 'tester');
+    setNewRole(user.role || 'salesteam');
     setIsRoleDialogOpen(true);
   };
 
@@ -397,9 +395,7 @@ export default function Users() {
     const styles: Record<AppRole, string> = {
       admin: 'bg-primary/15 text-primary border-primary/40',
       manager: 'bg-primary/15 text-primary border-primary/40',
-      tester: 'bg-secondary text-muted-foreground border-border',
-      pentester: 'bg-secondary text-muted-foreground border-border',
-      client: 'bg-primary text-primary-foreground border-primary shadow-sm shadow-primary/30',
+      salesteam: 'bg-secondary text-muted-foreground border-border',
     };
     return (
       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${styles[userRole]}`}>
@@ -412,9 +408,7 @@ export default function Users() {
     switch (userRole) {
       case 'admin': return <Crown className="h-4 w-4" />;
       case 'manager': return <Briefcase className="h-4 w-4" />;
-      case 'tester': return <ShieldCheck className="h-4 w-4" />;
-      case 'pentester': return <ShieldCheck className="h-4 w-4" />;
-      case 'client': return <Building2 className="h-4 w-4" />;
+      case 'salesteam': return <ShieldCheck className="h-4 w-4" />;
       default: return <UserCog className="h-4 w-4" />;
     }
   };
@@ -428,11 +422,8 @@ export default function Users() {
       <SelectItem value="manager">
         <div className="flex items-center gap-2"><Briefcase className="h-4 w-4 text-primary" />Manager</div>
       </SelectItem>
-      <SelectItem value="tester">
-        <div className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-primary" />Sales Team</div>
-      </SelectItem>
-      <SelectItem value="pentester">
-        <div className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-primary" />Pentester</div>
+      <SelectItem value="salesteam">
+        <div className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-primary" />Salesteam</div>
       </SelectItem>
     </>
   );
@@ -440,8 +431,7 @@ export default function Users() {
   const roleStats = {
     admins: users.filter(u => u.role === 'admin').length,
     managers: users.filter(u => u.role === 'manager').length,
-    testers: users.filter(u => u.role === 'tester').length,
-    pentesters: users.filter(u => u.role === 'pentester').length,
+    salesteam: users.filter(u => u.role === 'salesteam').length,
   };
 
   if (isLoading) {
@@ -459,12 +449,11 @@ export default function Users() {
       <div className="space-y-6 px-4 sm:px-0">
 
         {/* ── Stats ──────────────────────────────────────────────────────── */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[
             { label: 'Admins', count: roleStats.admins, Icon: Crown },
             { label: 'Managers', count: roleStats.managers, Icon: Briefcase },
-            { label: 'Sales Team', count: roleStats.testers, Icon: ShieldCheck },
-            { label: 'Pentesters', count: roleStats.pentesters, Icon: ShieldCheck },
+            { label: 'Salesteam', count: roleStats.salesteam, Icon: ShieldCheck },
           ].map(({ label, count, Icon }, i) => (
             <Card key={label} className="animate-fade-in hover:shadow-lg transition-all" style={{ animationDelay: `${i * 50}ms` }}>
               <CardContent className="p-4">
@@ -697,16 +686,14 @@ export default function Users() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-                      {member.role !== 'client' ? (
-                        <DropdownMenuItem
-                          onClick={() => {
-                            openUserProfile(member);
-                          }}
-                        >
-                          <UserCheck className="h-4 w-4 mr-2" />
-                          View profile
-                        </DropdownMenuItem>
-                      ) : null}
+                      <DropdownMenuItem
+                        onClick={() => {
+                          openUserProfile(member);
+                        }}
+                      >
+                        <UserCheck className="h-4 w-4 mr-2" />
+                        View profile
+                      </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleChangeRole(member)}>
                         <UserCog className="h-4 w-4 mr-2" />Change Role
                       </DropdownMenuItem>

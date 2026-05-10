@@ -50,7 +50,9 @@ router.get('/', requireAdminOrManager, async (req, res) => {
     const [users] = await db.query(
       'SELECT id, name, full_name, email, role, created_at FROM users ORDER BY created_at DESC'
     );
-    res.json(users);
+    // Normalize role to lowercase for stable frontend matching.
+    const normalized = users.map((u) => ({ ...u, role: u.role ? String(u.role).toLowerCase() : null }));
+    res.json(normalized);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -77,7 +79,7 @@ router.post('/', requireAdminOrManager, async (req, res) => {
     }
 
     // Valid roles validation
-    const VALID_ROLES = ['admin', 'manager', 'tester', 'pentester', 'client'];
+    const VALID_ROLES = ['admin', 'manager', 'salesteam'];
     if (role && !VALID_ROLES.includes(role)) {
       return res.status(400).json({ error: 'Invalid role specified' });
     }
@@ -93,7 +95,7 @@ router.post('/', requireAdminOrManager, async (req, res) => {
     const hashed = await bcrypt.hash(password, 10);
     const [result] = await db.query(
       'INSERT INTO users (name, full_name, email, password, role) VALUES (?, ?, ?, ?, ?)',
-      [name, full_name || null, email, hashed, role || 'tester']
+      [name, full_name || null, email, hashed, role || 'salesteam']
     );
 
     res.json({ id: result.insertId, message: 'User created successfully' });
@@ -107,7 +109,7 @@ router.put('/:id/role', requireAdminOrManager, async (req, res) => {
   try {
     const { role } = req.body;
 
-    const VALID_ROLES = ['admin', 'manager', 'tester', 'pentester', 'client'];
+    const VALID_ROLES = ['admin', 'manager', 'salesteam'];
     if (!role || !VALID_ROLES.includes(role)) {
       return res.status(400).json({ error: 'Invalid role specified' });
     }

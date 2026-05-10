@@ -85,7 +85,7 @@ const orangeTableBorders = {
  *   critical  → primary style  (solid orange, like "Admin")
  *   high      → primary/15     (tinted orange, like "Manager")
  *   medium    → primary/10     (lighter tint)
- *   low       → secondary      (muted, like "Tester")
+ *   low       → secondary      (muted, like "Salesteam")
  *   info      → secondary      (muted)
  */
 const getSeverityBadgeClass = (severity: string): string => ({
@@ -325,7 +325,7 @@ export function UserProfileDialog({
         switch (role?.toLowerCase()) {
             case 'admin':   return <Crown       className="h-4 w-4 text-white/90" />;
             case 'manager': return <Briefcase   className="h-4 w-4 text-white/90" />;
-            case 'tester':  return <ShieldCheck className="h-4 w-4 text-white/90" />;
+            case 'salesteam':  return <ShieldCheck className="h-4 w-4 text-white/90" />;
             default:        return <Shield      className="h-4 w-4 text-white/90" />;
         }
     };

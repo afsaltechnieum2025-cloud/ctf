@@ -31,7 +31,7 @@ import { cn } from '@/lib/utils';
 import { useState, useEffect } from 'react';
 import logo from '@/assets/technieum-logo.png';
 
-const staffRoles = ['admin', 'manager', 'tester', 'pentester'] as const;
+const staffRoles = ['admin', 'manager', 'salesteam'] as const;
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: [...staffRoles] },
@@ -77,7 +77,7 @@ export default function AppSidebar() {
         return <Crown className="h-4 w-4 text-primary" />;
       case 'manager':
         return <Briefcase className="h-4 w-4 text-primary" />;
-      case 'tester':
+      case 'salesteam':
         return <Shield className="h-4 w-4 text-primary" />;
       default:
         return <User className="h-4 w-4 text-muted-foreground" />;

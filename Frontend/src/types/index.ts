@@ -1,4 +1,4 @@
-export type UserRole = 'admin' | 'manager' | 'tester';
+export type UserRole = 'admin' | 'manager' | 'salesteam';
 
 export interface User {
   id: string;
@@ -23,7 +23,7 @@ export interface Project {
     password: string;
     notes?: string;
   }[];
-  assignedTesters: string[];
+  assignedSalesteam: string[];
   managerId: string;
   status: ProjectStatus;
   startDate: Date;

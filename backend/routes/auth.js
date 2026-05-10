@@ -40,15 +40,19 @@ router.post('/login', async (req, res) => {
         if (!match)
             return res.status(400).json({ error: 'Invalid email or password' });
 
+        // Normalize role casing so frontend role checks are stable regardless
+        // of how the value was written to the DB (e.g. 'Salesteam' vs 'salesteam').
+        const role = (user.role || '').toLowerCase();
+
         const token = jwt.sign(
-            { id: user.id, email: user.email, name: user.name, role: user.role },
+            { id: user.id, email: user.email, name: user.name, role },
             process.env.JWT_SECRET,
             { expiresIn: '24h' }
         );
 
         res.json({
             token,
-            user: { id: user.id, name: user.name, email: user.email, role: user.role }
+            user: { id: user.id, name: user.name, email: user.email, role }
         });
     } catch (err) {
         res.status(500).json({ error: err.message });

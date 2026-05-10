@@ -82,7 +82,7 @@ function NotificationList({ notifications }: { notifications: Notification[] }) 
         <Bell size={36} style={{ opacity: 0.25, marginBottom: '12px', color: 'hsl(var(--muted-foreground))' }} />
         <p style={{ fontSize: '13px', margin: 0 }}>No notifications yet</p>
         <p style={{ fontSize: '11px', margin: '4px 0 0', opacity: 0.6, textAlign: 'center', maxWidth: 260, lineHeight: 1.45 }}>
-          Admins and managers see activity across the portal. Testers see their assigned projects and their own actions.
+          Admins and managers see activity across the portal. Salesteam users see their assigned projects and their own actions.
         </p>
       </div>
     );
